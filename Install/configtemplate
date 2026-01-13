@@ -1,0 +1,27 @@
+<?php
+/**
+ * Database configuratie
+ */
+$config['database']['host'] = "DATABASE_HOSTNAME";
+$config['database']['username'] = "DATABASE_USERNAME";
+$config['database']['password'] = "DATABASE_PASSWORD";
+$config['database']['dbname'] = "DATABASE_NAME";
+
+/**
+ * App instellingen
+ */
+$config['app']['name'] = "APP_NAME";
+$config['app']['logo'] = "APP_LOGO";
+$config['app']['hostname'] = "APP_HOSTNAME";
+$config['email']['from'] = "EMAIL_FROM";
+
+/**
+ * Versleuteling
+ */
+$config['crypto']['privatekey'] = __dir__."/privatekey.pem";
+
+/**
+ * Genereer een RSA key (aanbevolen 4096 bits) en bewaar deze in privatekey.pem
+ * Dit kan je onlien genereren (https://cryptotools.net/rsagen)
+ * Bij voorkeur genereren op de server zelf
+ */

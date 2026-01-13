@@ -1,0 +1,19 @@
+select.selectcolumn {
+    height: 150px;
+    outline: none;
+    border: 1px solid #e5e7eb;
+    width: 180px;
+}
+table.listingtable,  table.listingtable tr, table.listingtable td, table.listingtable th {
+   border: 1px solid black;
+}
+table.listingtable th, table.listingtable td {
+    vertical-align: top;
+    text-align: left;
+}
+table.listingtable img.actionbutton {
+    width: 20px;
+    height: 20px;
+    padding-right: 5px;
+    cursor: pointer;
+}
