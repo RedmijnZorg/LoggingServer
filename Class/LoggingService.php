@@ -99,7 +99,6 @@ class LoggingService
      * @return array
      */
     public function getLogs($yearFilter = 0, $monthFilter = 0, $dayFilter = 0, $sourceFilter = 0, $eventFilter = "", $textFilter = "", $allowedFilter = 2, $sortField = "timestamp", $sortDirection = "ASC") {
-    		echo $sourceFilter;
     		if($sortDirection == "DESC") {
     				$sortDirection = "DESC";
     			} else {

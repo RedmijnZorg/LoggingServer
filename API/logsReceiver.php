@@ -1,11 +1,10 @@
 <?php
-//header('Content-type: application/json');
-//ini_set('display_errors', 0);
+header('Content-type: application/json');
+ini_set('display_errors', 0);
 require_once(__dir__."/../secure/includes.php");
 
 $sourceManager = new SourceManager($database);
 $sourceDetails = $sourceManager->getSourceFromHeaders();
-
 if($sourceDetails == false) {
     http_response_code(403);
     echo json_encode(array("error" => "App token invalid."));
