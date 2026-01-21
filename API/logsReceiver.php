@@ -21,6 +21,7 @@ $logarray = json_decode($logdata);
 $passedarray = array();
 $failedarray = array();
 $processedamount = 0;
+$sourceManager->updateSourceSignal($sourceDetails['sourceid']);
 foreach($logarray as $log) {
 		    $additem = $loggingService->logEvent(
 		    	$sourceDetails['sourceid'], 

@@ -21,7 +21,7 @@ class SourceManager
         $cryptoService = new CryptoService();
         $token = $cryptoService->generateUUID();
 
-        $addsource = $this->database->query("INSERT INTO sources (name, token) VALUES ('$name', '$token')");
+        $addsource = $this->database->query("INSERT INTO sources (name, token,lastsignal) VALUES ('$name', '$token','0')");
         if ($addsource) {
             return $this->database->insert_id;
         } else {
@@ -93,6 +93,16 @@ class SourceManager
             return $this->getSourceByToken($token);
         } else
             return false;
+    }
+    
+    /**
+     * @param int $sourceid
+     * @return bool
+     */
+    public function updateSourceSignal($sourceid) {
+        $sourceid = $this->database->real_escape_string($sourceid);
+        $timestamp = time();
+        return $this->database->query("UPDATE sources SET lastsignal = '$timestamp' WHERE sourceid = '$sourceid'");
     }
 
 }

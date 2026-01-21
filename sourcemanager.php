@@ -14,6 +14,7 @@ $sourcesArray = $sourceManager->getAllsources();
     <tr>
         <th>Naam</th>
         <th>Token</th>
+        <th>Laatste sync</th>
         <th>Acties</th>
     </tr>
     <?php
@@ -21,6 +22,11 @@ $sourcesArray = $sourceManager->getAllsources();
         echo "<tr>";
         echo "<td>".$source['name']."</td>";
         echo "<td>".$source['token']."</td>";
+        if($source['lastsignal'] == 0) {
+        		echo "<td>Nooit</td>";
+        	} else {
+        		echo "<td>".date("d-m-Y H:i:s",$source['lastsignal'])."</td>";
+        }
         echo "<td><img class='actionbutton' src='images/delete.png' style='width: 20px; height; 20px' onclick=\"switchOverlay(); deleteSource(".$source['sourceid'].")\" /></td>";
         echo "</tr>";
     }
@@ -71,7 +77,6 @@ $sourcesArray = $sourceManager->getAllsources();
 
 
 <?php
-echo $keyrenders;
 if(isset($_POST['addnewsource'])) {
     $name = $_POST['sourcename'];
 

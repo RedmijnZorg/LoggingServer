@@ -62,7 +62,8 @@ CREATE TABLE `logging` (
 CREATE TABLE `sources` (
   `sourceid` int(11) NOT NULL,
   `name` text NOT NULL,
-  `token` text NOT NULL
+  `token` text NOT NULL,
+  `lastsignal` int default '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
 -- --------------------------------------------------------
