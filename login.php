@@ -37,7 +37,7 @@ if(isset($_POST["submit"])){
         ini_set('session.cookie_domain',$config['app']['cookiedomain']);
         session_start();
         $_SESSION["user"] = $login;
-        $_SESSION["user"]['2fapass'] = false;
+        $_SESSION["user"]['2fapass'] = true;
 
         header("location: /");
     }
