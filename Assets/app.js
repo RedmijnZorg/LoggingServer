@@ -1,230 +1,262 @@
+/** Specifieke JS voor app **/
+
+/**
+	** @param string sourceBox
+	** @param string targetBox
+	** @return void
+**/
 function moveGroups(sourceBox,targetBox) {
-    sourceBox = document.getElementById(sourceBox);
-    targetBox = document.getElementById(targetBox);
-
-    const removeNodes = [];
-    removeNodesCounter = 0;
-
-    for(i=0;i<sourceBox.options.length;i++){
-        if(sourceBox.options[i].selected === true) {
-            sourceBox.options[i].selected = false;
-            optionElement = document.createElement("option");
-            optionElement.text = sourceBox.options[i].text;
-            optionElement.value = sourceBox.options[i].value;
-            removeNodes[removeNodesCounter] = sourceBox.options[i];
-            removeNodesCounter++;
-            targetBox.sourceendChild(optionElement);
-        }
-    }
-
-    for(i=0;i<removeNodes.length;i++){
-        removeNodes[i].remove();
-    }
+		// Iedere group uit de bronlijst nalopen
+    	$("#"+sourceBox+" option").each(function() {
+    			// Is deze groep geselecteerd?
+				if($(this).is(":selected") === true) {
+						// Voeg toe aan de doellijst
+						$("#"+targetBox).append($('<option>', {
+								value: $(this).val(),
+								text: $(this).text()
+						}));
+						// Verwijder van de bronlijst
+						$(this).remove();
+				}
+		});
 }
 
+/**
+	** @param string sourceBox
+	** @param string targetBox
+	** @return void
+**/
 function resetAllGroups(sourceBox,targetBox) {
-    sourceBox = document.getElementById(sourceBox);
-    targetBox = document.getElementById(targetBox);
-    for(i=0;i<targetBox.options.length;i++){
-        targetBox.options[i].selected = false;
-        sourceBox.sourceendChild(targetBox.options[i]);
-        targetBox.remove(targetBox.options[i]);
-    }
+		// Iedere group uit de doellijst nalopen
+		$("#"+targetBox+" option").each(function() {
+				// Groep deselecteren
+				$(this).attr("selected",false);
+				// Voeg toe aan de bronlijst
+				$("#"+sourceBox).append($(this));
+				// Verwijder van de doellijst
+				$(this).remove();
+		});
 }
 
-function editUser(userid) {
-    $.ajax({
-
-        // Our sample url to make request
-        url:
-            '/ajax/getuserdetails?userid='+userid,
-
-        // Type of Request
-        type: "GET",
-
-        // Function to call when to
-        // request is ok
-        success: function (data) {
-            fullname = data.fullname;
-            email = data.email;
-
-            document.getElementById("useridedit").value=userid;
-            document.getElementById("fullnameedit").value=decodeURIComponent(fullname);
-            document.getElementById("emailedit").value=decodeURIComponent(email);
-
-            savebutton = document.getElementById("saveexistinguserbutton");
-            savebutton.disabled = false;
-            savebutton.classList.remove("disabled");
-            fullnamebox = document.getElementById("fullnameedit");
-            emailbox = document.getElementById("emailedit");
-            fullnamebox.classList.remove("error");
-            emailbox.classList.remove("error");
-            document.getElementById("edituser").style.display="block";
-            fullnamebox.focus();
-
-        },
-
-        // Error handling
-        error: function (error) {
-            showErrorMessage('Fout','Er ging iets fout!');
-        }
-    });
-}
-
-function deleteUser(userid) {
-    document.getElementById("useriddelete").value=userid;
-    document.getElementById("deleteuser").style.display="block";
-}
-
-function reset2fa(userid) {
-    document.getElementById("userid2fa").value=userid;
-    document.getElementById("reset2fa").style.display="block";
-}
-
-function lockuser(userid) {
-    document.getElementById("useridlock").value=userid;
-    document.getElementById("lockuser").style.display="block";
-}
-
-function unlockuser(userid) {
-    document.getElementById("useridunlock").value=userid;
-    document.getElementById("unlockuser").style.display="block";
-}
-
+/**
+	** @param string box
+	** @return void
+**/
 function selectAllOptions(box) {
-    boxitem = document.getElementById(box);
-    for(i=0;i<boxitem.options.length;i++){
-        boxitem.options[i].selected=true;
-    }
+		// Selecteer ieder item uit de select
+		$("#"+box+" option").prop('selected', true);
 }
 
+/**
+	** @param int userid
+	** @return void
+**/
+function editUser(userid) {
+		$.ajax({
+			url:
+				'/ajax/getuserdetails?userid='+userid,
+			type: "GET",
+			success: function (data) {
+					// ID, naam en mailadres invullen
+					$("#useridedit").val(userid);
+					$("#fullnameedit").val(decodeURIComponent(data.fullname));
+					$("#emailedit").val(decodeURIComponent(data.email));
+					// Formulier is compleet ingevuld, alle blokkades opheffen
+					$("#saveexistinguserbutton").attr("disabled",false);
+					$("#saveexistinguserbutton").removeClass("disabled");
+					$("#fullnameedit").removeClass("error");
+					$("#emailedit").removeClass("error");
+					
+					// Venster tonen
+					$("#edituser").css("display","block");
+					
+					// Naamvakje selecteren
+					$("#fullnameedit").focus();
+			},
+			error: function (error) {
+					showErrorMessage('Fout','Er ging iets fout!');
+			}
+		});
+}
+
+/**
+	** @param int userid
+	** @return void
+**/
+function deleteUser(userid) {
+    	$("#useriddelete").val(userid);
+		$("#deleteuser").css("display","block");
+}
+
+/**
+	** @param int userid
+	** @return void
+**/
+function reset2fa(userid) {
+    	$("#userid2fa").val(userid);
+		$("#reset2fa").css("display","block");
+}
+
+/**
+	** @param int userid
+	** @return void
+**/
+function lockuser(userid) {
+    	$("#useridlock").val(userid);
+		$("#lockuser").css("display","block");
+}
+
+/**
+	** @param int userid
+	** @return void
+**/
+function unlockuser(userid) {
+	    $("#useridunlock").val(userid);
+		$("#unlockuser").css("display","block");
+}
+
+/**
+	** @param int userid
+	** @return void
+**/
 function resetpassword(userid) {
-    document.getElementById("useridreset").value=userid;
-    document.getElementById("resetpassword").style.display="block";
+    	$("#useridreset").val(userid);
+		$("#resetpassword").css("display","block");
 }
 
+/**
+	** @return void
+**/
 function verifyAdduser() {
-
-    fullnamebox = document.getElementById("fullname");
-    emailbox = document.getElementById("email");
-    passwordbox = document.getElementById("password");
-    savebutton = document.getElementById("savenewuserbutton");
-
-    error = true;
-
-    if(fullnamebox.value == "") {
-        fullnamebox.classList.add("error");
-    } else {
-        fullnamebox.classList.remove("error");
-    }
-
-    if(emailbox.value == "" || validateEmail(emailbox.value) !== true) {
-        emailbox.classList.add("error");
-    } else {
-        emailbox.classList.remove("error");
-    }
-
-    if(passwordbox.value == "") {
-        passwordbox.classList.add("error");
-    } else {
-        passwordbox.classList.remove("error");
-    }
-
-    if(fullnamebox.value != "" && emailbox.value != "" && passwordbox.value != "" && validateEmail(emailbox.value) === true) {
-        error = false;
-        fullnamebox.classList.remove("error");
-        emailbox.classList.remove("error");
-        passwordbox.classList.remove("error");
-    }
-
-    if(error === true) {
-        savebutton.disabled = true;
-        savebutton.classList.add("disabled");
-    } else {
-        savebutton.disabled = false;
-        savebutton.classList.remove("disabled");
-    }
+		error = true;
+		
+		// Controleren of naam is ingevuld
+		if($("#fullname").val() == "") {
+				$("#fullname").addClass("error");
+			} else {
+				$("#fullname").removeClass("error");
+		}
+	
+		// Controleren of email is ingevuld en geldig is
+		if($("#email").val() != "" && validateEmail($("#email").val()) !== true) {
+				$("#email").addClass("error");
+			} else {
+				$("#email").removeClass("error");
+		}
+		
+		// Controleren of wachtwoord is ingevuld
+		if($("#password").val() == "") {
+				$("#password").addClass("error");
+			} else {
+				$("#password").removeClass("error");
+		}
+	
+		// Controleren of alles goed is ingevuld
+		if($("#fullname").val() != "" && $("#password").val() != "" && $("#email").val() != "" && validateEmail($("#email").val()) === true) {
+				// Zo ja, haal alle rode randen weg
+				error = false;
+				$("#fullname").removeClass("error");
+				$("#email").removeClass("error");
+				$("#password").removeClass("error");
+			} else {
+				error = true;
+		}
+		if(error === true) {
+				// Blokkeren bij validatieprobleem
+				$("#savenewuserbutton").attr("disabled",true);
+				$("#savenewuserbutton").addClass("disabled");
+			} else {
+				// Deblokkeren bij geen validatieprobleem
+				$("#savenewuserbutton").attr("disabled",false);        
+				$("#savenewuserbutton").removeClass("disabled");
+		}
 }
 
+/**
+	** @return void
+**/
 function verifyEdituser() {
-
-    fullnamebox = document.getElementById("fullnameedit");
-    emailbox = document.getElementById("emailedit");
-    savebutton = document.getElementById("saveexistinguserbutton");
-
-    error = true;
-
-    if(fullnamebox.value == "") {
-        fullnamebox.classList.add("error");
-    } else {
-        fullnamebox.classList.remove("error");
-    }
-
-    if(emailbox.value == "" || validateEmail(emailbox.value) !== true) {
-        emailbox.classList.add("error");
-    } else {
-        emailbox.classList.remove("error");
-    }
-
-    if(fullnamebox.value != "" && emailbox.value != "" && validateEmail(emailbox.value) === true) {
-        error = false;
-        fullnamebox.classList.remove("error");
-        emailbox.classList.remove("error");
-        emailbox.classList.remove("error");
-    }
-
-    if(error === true) {
-        savebutton.disabled = true;
-        savebutton.classList.add("disabled");
-    } else {
-        savebutton.disabled = false;
-        savebutton.classList.remove("disabled");
-    }
+		error = true;
+		
+		// Controleren of naam is ingevuld
+		if($("#fullnameedit").val() == "") {
+				$("#fullnameedit").addClass("error");
+			} else {
+				$("#fullnameedit").removeClass("error");
+		}
+		
+		// Controleren of email is ingevuld en geldig is
+		if($("#emailedit").val() != "" && validateEmail($("#emailedit").val()) !== true) {
+				$("#emailedit").addClass("error");
+			} else {
+				$("#emailedit").removeClass("error");
+		}
+		
+		// Controleren of alles goed is ingevuld
+		if($("#fullnameedit").val() != "" && $("#emailedit").val() != "" && validateEmail($("#emailedit").val()) === true) {
+					// Zo ja, haal alle rode randen weg
+					error = false;
+					$("#fullnameedit").removeClass("error");
+					$("#emailedit").removeClass("error");			
+				} else {
+					error = true;
+		}
+		if(error === true) {
+				// Blokkeren bij validatieprobleem
+				$("#saveexistinguserbutton").attr("disabled",true);
+				$("#saveexistinguserbutton").addClass("disabled");
+			} else {
+				// Deblokkeren bij geen validatieprobleem
+				$("#savenewusergroupbutton").attr("disabled",false);        
+				$("#saveexistinguserbutton").removeClass("disabled");
+		}
 }
 
+/**
+	** @param int sourceid
+	** @return void
+**/
 function deleteSource(sourceid) {
-    document.getElementById("sourceiddelete").value=sourceid;
-    document.getElementById("deletesource").style.display="block";
+		$("#sourceiddelete").val(sourceid);
+		$("#deletesource").css("display","block");
 }
 
+/**
+	** @return void
+**/
 function verifyAddsource() {
-
-    sourcenamebox = document.getElementById("sourcename");
-    savebutton = document.getElementById("savenewsourcebutton");
-
-    error = true;
-
-    if(sourcenamebox.value == "") {
-        sourcenamebox.classList.add("error");
-        error = true;
-    } else {
-        sourcenamebox.classList.remove("error");
-        error = false;
-    }
-
-    if(error === true) {
-        savebutton.disabled = true;
-        savebutton.classList.add("disabled");
-    } else {
-        savebutton.disabled = false;
-        savebutton.classList.remove("disabled");
-    }
+		error = true;
+		
+		// Als de naam niet is ingevuld, toon een fout
+		if($("#appname").val() == "") {
+				$("#sourcename").addClass("error");
+				error = true;
+			} else {
+				$("#sourcename").removeClass("error");
+				error = false;
+		}
+		
+		// Formulier blokkeren bij validatiefouten
+		if(error === true) {
+				$("#savenewsourcebutton").attr("disabled",true);
+				$("#savenewsourcebutton").addClass("disabled");
+			} else {
+				$("#savenewsourcebutton").attr("disabled",false);        
+				$("#savenewsourcebutton").removeClass("disabled");
+		}
 }
 
+
+/**
+	** @return void
+**/
 function sessionKeepAlive() {
-    $.ajax({
-
-        // Our sample url to make request
-        url:
-            '/ajax/sessionkeepalive',
-
-        // Type of Request
-        type: "GET",
-
-        // Function to call when to
-        // request is ok
-        success: function (data) {
-           setTimeout(sessionKeepAlive,60000);
-        }
-    });
+		$.ajax({
+			url:
+				'/ajax/sessionkeepalive',
+			type: "GET",
+			success: function (data) {
+					setTimeout(sessionKeepAlive,60000);
+			}
+		});
 }

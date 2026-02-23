@@ -1,50 +1,90 @@
+/** Globale JS Red mijn Zorg Cloud Engine **/
+
+/**
+	** @return void
+**/
 function expandMenu() {
-    menuContainer = document.getElementById("menu");
-    menuItems = menuContainer.childNodes;
-    for(i=0; i<menuItems.length; i++) {
-        if(menuItems[i].className == "menuitem") {
-            menuItems[i].classList.add("show");
-        }
-    }
-    document.getElementById("menubutton").onclick = function(){ collapseMenu()};
+		menuContainer = $('#menu');
+		menuItems = menuContainer.children();
+		for(i=0; i<menuItems.length; i++) {
+			if(menuItems[i].hasClass("menuitem")) {
+				menuItems[i].addClass("show");
+			}
+		}
+		$('#menubutton').click(function(){ collapseMenu()});
 }
+
+/**
+	** @return void
+**/
 function collapseMenu() {
-    menuContainer = document.getElementById("menu");
-    menuItems = menuContainer.childNodes;
-    for(i=0; i<menuItems.length; i++) {
-        if(menuItems[i].className == "menuitem show") {
-            menuItems[i].classList.remove("show");
-        }
-    }
-    document.getElementById("menubutton").onclick = function(){ expandMenu()};
+		menuContainer = $('#menu');
+		menuItems = menuContainer.children();
+		for(i=0; i<menuItems.length; i++) {
+			if(menuItems[i].hasClass("show")) {
+				menuItems[i].removeClass("show");
+			}
+		}
+		$('#menubutton').click(function(){ expandMenu()});
 }
 
+/**
+	** @return void
+**/
 function switchOverlay() {
-    if(document.getElementById("overlay").style.display == "block") {
-        document.getElementById("overlay").style.display = "none";
-    } else {
-        document.getElementById("overlay").style.display = "block";
-    }
+		if(document.getElementById("overlay").style.display == "block") {
+				$('#overlay').css("display","none");
+			} else {
+				$('#overlay').css("display","block");
+				$('#overlay').css('height',$(document).height()+'px');
+		}
 }
 
+/**
+	** @param string box
+	** @param string contents
+	** @return void
+**/
 function setErrorMessage(box,contents) {
-    document.getElementById(box).innerHTML = contents;
+    	$('#'+box).html(contents);
 }
 
+/**
+	** @param string title
+	** @param string contents
+	** @return void
+**/
 function showErrorMessage(title,contents) {
-    document.getElementById('errorbox').style.display = "block";
-    document.getElementById('errortitle').innerHTML = title;
-    document.getElementById('errormessage').innerHTML = contents;
-    document.getElementById("overlay").style.display = "block";
+		$('#errorbox').css("display","block");
+		$('#errortitle').html(title);
+		$('#errormessage').html(contents);
+		$('#overlay').css("display","block");
+		$('#errorbox').scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'start'});
 }
 
+/**
+	** @return void
+**/
 function hideErrorMessage() {
-    document.getElementById('errorbox').style.display = "none";
-    document.getElementById('errortitle').innerHTML = "";
-    document.getElementById('errormessage').innerHTML = "";
-    document.getElementById("overlay").style.display = "none";
+		$('#errorbox').css("display","none");
+		$('#errortitle').html("");
+		$('#errormessage').html("");
+		$('#errorbox').css("overlay","none");
 }
+
+/**
+	** @param string email
+	** @return void
+**/
 function validateEmail(email) {
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
+    	var re = /\S+@\S+\.\S+/;
+    	return re.test(email);
+}
+
+/**
+	** @return void
+**/
+function scrollToTop() {
+  	document.body.scrollTop = 0; 
+  	document.documentElement.scrollTop = 0; 
 }
