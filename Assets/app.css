@@ -17,3 +17,9 @@ table.listingtable img.actionbutton {
     padding-right: 5px;
     cursor: pointer;
 }
+button#setupLink {
+	display: none;
+}
+span#twofaerror {
+	margin-top: -30px;
+}
