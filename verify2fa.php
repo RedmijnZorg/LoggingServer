@@ -64,7 +64,7 @@ if(isset($_POST["submitform"])){
 			$_SESSION["user"]['2fapass'] = true;
 			header("location: /");
        } else {
-			echo "<script type='text/javascript'>setErrorMessage('twofaerror','Code onjuist of verlopen!'); document.getElementById('digit1').focus();</script>";
+			echo "<script type='text/javascript'>setErrorMessage('twofaerror','Code onjuist of verlopen!'); $('#digit1').focus();</script>";
        }
    } else {
        echo "<script type='text/javascript'>setErrorMessage('twofaerror','Code is verplicht!');</script>";

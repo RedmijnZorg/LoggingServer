@@ -32,7 +32,7 @@ $sourcesArray = $sourceManager->getAllsources();
     }
     ?>
 </table><br>
-    <button type="button" class="button" onclick="switchOverlay(); document.getElementById('addsource').style.display='block'; document.getElementById('sourcename').focus();">Bron toevoegen</button>
+    <button type="button" class="button" onclick="switchOverlay(); $('#addsource').css('display','block'); $('#sourcename').focus();">Bron toevoegen</button>
 </div>
     <div class="message-container" id="addsource" style="display:none; height: 300px; width: 600px;">
         <p class="message-title">Bron toevoegen</p>
@@ -47,10 +47,10 @@ $sourcesArray = $sourceManager->getAllsources();
         </table>
         <span class="errormessage" id="erroradd"></span>
         <div class="buttons-container">
-            <button type="button" class="button disabled" id='savenewsourcebutton' onclick="document.getElementById('addsourceform').submit();" disabled>
+            <button type="button" class="button disabled" id='savenewsourcebutton' onclick="$('#addsourceform').submit();" disabled>
                 Opslaan
             </button>
-            <button type="button" class="button" onclick="switchOverlay(); document.getElementById('addsource').style.display='none';">
+            <button type="button" class="button" onclick="switchOverlay(); $('#addsource').css('display','none');">
                 Annuleren
             </button>
         </div>
@@ -65,10 +65,10 @@ $sourcesArray = $sourceManager->getAllsources();
                 Weet u zeker dat u deze bron wilt verwijderen?
             </div>
             <div class="buttons-container">
-                <button type="button" class="button" onclick="document.getElementById('deletesourceform').submit();">
+                <button type="button" class="button" onclick="$('#deletesourceform').submit();">
                     Ja
                 </button>
-                <button type="button" class="button" onclick="switchOverlay(); document.getElementById('deletesource').style.display='none';">
+                <button type="button" class="button" onclick="switchOverlay(); $('#deletesource').css('display','none');">
                     Nee
                 </button>
             </div>

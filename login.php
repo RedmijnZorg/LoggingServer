@@ -44,4 +44,4 @@ if(isset($_POST["submit"])){
 }
 ?>
 
-<script>document.getElementById('emailbox').focus();</script>
+<script>$('#emailbox').focus();</script>

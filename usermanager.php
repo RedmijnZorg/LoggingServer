@@ -63,7 +63,7 @@ $newGeneratedPassword = $cryptoService->generatePassword();
     }
     ?>
 </table><br>
-    <button type="button" class="button" onclick="switchOverlay(); document.getElementById('adduser').style.display='block'; document.getElementById('fullname').focus();">Gebruiker toevoegen</button>
+    <button type="button" class="button" onclick="switchOverlay(); $('#adduser').css('display','block'); $('#fullname').focus();">Gebruiker toevoegen</button>
     </div>
     <div class="message-container" id="adduser" style="display:none; height: 550px; width: 780px;">
         <p class="message-title">Gebruiker toevoegen</p>
@@ -86,10 +86,10 @@ $newGeneratedPassword = $cryptoService->generatePassword();
         </table>
         <span class="errormessage" id="erroradd"></span>
         <div class="buttons-container">
-            <button type="button" class="button disabled" id='savenewuserbutton' onclick="document.getElementById('adduserform').submit();" disabled>
+            <button type="button" class="button disabled" id='savenewuserbutton' onclick="$('#adduserform').submit();" disabled>
                 Opslaan
             </button>
-            <button type="button" class="button" onclick="switchOverlay(); document.getElementById('adduser').style.display='none';">
+            <button type="button" class="button" onclick="switchOverlay(); $('#adduser').css('display','none');">
                 Annuleren
             </button>
         </div>
@@ -113,10 +113,10 @@ $newGeneratedPassword = $cryptoService->generatePassword();
         <span class="errormessage" id="erroredit"></span>
 
         <div class="buttons-container">
-            <button type="button" class="button" id='saveexistinguserbutton' onclick="document.getElementById('edituserform').submit();">
+            <button type="button" class="button" id='saveexistinguserbutton' onclick="$('#edituserform').submit();">
                 Opslaan
             </button>
-            <button type="button" class="button" onclick="switchOverlay(); document.getElementById('edituser').style.display='none';">
+            <button type="button" class="button" onclick="switchOverlay(); $('#edituser').css('display','none');">
                 Annuleren
             </button>
         </div>
@@ -131,10 +131,10 @@ $newGeneratedPassword = $cryptoService->generatePassword();
                 Weet u zeker dat u deze gebruiker wilt verwijderen?
             </div>
             <div class="buttons-container">
-                <button type="button" class="button" onclick="document.getElementById('deleteuserform').submit();">
+                <button type="button" class="button" onclick="$('#deleteuserform').submit();">
                     Ja
                 </button>
-                <button type="button" class="button" onclick="switchOverlay(); document.getElementById('deleteuser').style.display='none';">
+                <button type="button" class="button" onclick="switchOverlay(); $('#deleteuser').css('display','none');">
                     Nee
                 </button>
             </div>
@@ -149,10 +149,10 @@ $newGeneratedPassword = $cryptoService->generatePassword();
                 Weet u zeker dat u de authenticator wilt resetten?
             </div>
             <div class="buttons-container">
-                <button type="button" class="button" onclick="document.getElementById('reset2faform').submit();">
+                <button type="button" class="button" onclick="$('#reset2faform').submit();">
                     Ja
                 </button>
-                <button type="button" class="button" onclick="switchOverlay(); document.getElementById('reset2fa').style.display='none';">
+                <button type="button" class="button" onclick="switchOverlay(); $('#reset2fa').css('display','none');">
                     Nee
                 </button>
             </div>
@@ -167,10 +167,10 @@ $newGeneratedPassword = $cryptoService->generatePassword();
                 Weet u zeker dat u deze gebruiker wilt blokkeren?
             </div>
             <div class="buttons-container">
-                <button type="button" class="button" onclick="document.getElementById('lockuserform').submit();">
+                <button type="button" class="button" onclick="$('#lockuserform').submit();">
                     Ja
                 </button>
-                <button type="button" class="button" onclick="switchOverlay(); document.getElementById('lockuser').style.display='none';">
+                <button type="button" class="button" onclick="switchOverlay(); $('#lockuser').css('display','none');">
                     Nee
                 </button>
             </div>
@@ -185,10 +185,10 @@ $newGeneratedPassword = $cryptoService->generatePassword();
                 Weet u zeker dat u deze gebruiker wilt deblokkeren?
             </div>
             <div class="buttons-container">
-                <button type="button" class="button" onclick="document.getElementById('unlockuserform').submit();">
+                <button type="button" class="button" onclick="$('#unlockuserform').submit();">
                     Ja
                 </button>
-                <button type="button" class="button" onclick="switchOverlay(); document.getElementById('unlockuser').style.display='none';">
+                <button type="button" class="button" onclick="switchOverlay(); $('#unlockuser').css('display','none');">
                     Nee
                 </button>
             </div>
@@ -203,10 +203,10 @@ $newGeneratedPassword = $cryptoService->generatePassword();
             Weet u zeker dat u een nieuw wachtwoord wilt instellen?
         </div>
             <div class="buttons-container">
-            <button type="button" class="button" onclick="document.getElementById('resetpasswordform').submit();">
+            <button type="button" class="button" onclick="$('#resetpasswordform').submit();">
                 Ja
             </button>
-            <button type="button" class="button" onclick="switchOverlay(); document.getElementById('resetpassword').style.display='none';">
+            <button type="button" class="button" onclick="switchOverlay(); $('#resetpassword').css('display','none');">
                 Nee
             </button>
             </div>

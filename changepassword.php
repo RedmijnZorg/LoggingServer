@@ -56,4 +56,4 @@ if(isset($_POST["submit"])) {
 }
 ?>
 
-<script>document.getElementById('currentpassword').focus();</script>
+<script>$('#currentpassword').focus();</script>

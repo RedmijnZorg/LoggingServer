@@ -28,15 +28,15 @@ $qrcode = $googleAuthenticator->getQRCodeGoogleUrl($config['app']['name'],$newse
         <div class="input-container" style="padding-bottom: 15px; text-align: center;"><?php echo $newsecret;?></div>
         <div class="input-container" style="text-align: center;">
             <div id="twofaboxes">
-                <input type="text" class="twofabox" maxlength="1" id="twofabox1" name="response[0]" onkeyup="document.getElementById('twofabox2').focus();">
-                <input type="text" class="twofabox" maxlength="1" id="twofabox2" name="response[1]" onkeyup="document.getElementById('twofabox3').focus();">
-                <input type="text" class="twofabox" maxlength="1" id="twofabox3" name="response[2]" onkeyup="document.getElementById('twofabox4').focus();">
-                <input type="text" class="twofabox" maxlength="1" id="twofabox4" name="response[3]" onkeyup="document.getElementById('twofabox5').focus();">
-                <input type="text" class="twofabox" maxlength="1" id="twofabox5" name="response[4]" onkeyup="document.getElementById('twofabox6').focus();">
-                <input type="text" class="twofabox" maxlength="1" id="twofabox6" name="response[5]" onkeyup="document.getElementById('twofaform').submit();">
+                <input type="text" class="twofabox" maxlength="1" id="twofabox1" name="response[0]" onkeyup="$('#twofabox2').focus();">
+                <input type="text" class="twofabox" maxlength="1" id="twofabox2" name="response[1]" onkeyup="$('#twofabox3').focus();">
+                <input type="text" class="twofabox" maxlength="1" id="twofabox3" name="response[2]" onkeyup="$('#twofabox4').focus();">
+                <input type="text" class="twofabox" maxlength="1" id="twofabox4" name="response[3]" onkeyup="$('#twofabox5').focus();">
+                <input type="text" class="twofabox" maxlength="1" id="twofabox5" name="response[4]" onkeyup="$('#twofabox6').focus();">
+                <input type="text" class="twofabox" maxlength="1" id="twofabox6" name="response[5]" onkeyup="$('#twofaform').submit();">
             </div>
         </div>
-        <button type="button" onclick="document.getElementById('twofaform').submit();" class="submit">
+        <button type="button" onclick="$('#twofaform').submit();" class="submit">
             Controleren
         </button>
 
@@ -67,4 +67,4 @@ if(isset($_POST["submitform"])){
     }
 }
 ?>
-<script>document.getElementById('twofabox1').focus();</script>
+<script>$('#twofabox1').focus();</script>
