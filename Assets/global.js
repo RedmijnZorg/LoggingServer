@@ -69,7 +69,7 @@ function hideErrorMessage() {
 		$('#errorbox').css("display","none");
 		$('#errortitle').html("");
 		$('#errormessage').html("");
-		$('#errorbox').css("overlay","none");
+		$('#overlay').css("display","none");
 }
 
 /**
