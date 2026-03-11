@@ -1,10 +1,17 @@
 <?php
+// Wordt dit script direct geopend zonder router? Redirect dan naar de juiste pagina.
 if (!isset($routerActive)) {
     ob_start();
     header("location: /");
     exit();
 }
+
+// Vereisten inladen
 require_once("secure/includes.php");
+
+// Classes laden
+$loggingService = new LoggingService($database);
+$loggingService->loadCryptoService($cryptoService);
 $sourceManager = new SourceManager($database);
 $sourcesArray = $sourceManager->getAllsources();
 $sourcesArrayPreloaded = array();
@@ -12,6 +19,7 @@ foreach($sourcesArray as $source) {
 	$sourcesArrayPreloaded[$source['sourceid']] = $source['name'];
 }
 ?>
+<!-- filter formulier -->
 <div id="bodycontainer">
 
 <h1>Centraal Logboek</h1>
@@ -26,6 +34,7 @@ foreach($sourcesArray as $source) {
 	</tr>
 	<tr>
 		<?php 
+		// Is er geen jaar of datum opgegeven? Gebruik de huidige maand en jaar
 		if(!isset($_POST['dateYear'])) {
 				$_POST['dateYear'] = date('Y',time());
 		}
@@ -55,6 +64,7 @@ foreach($sourcesArray as $source) {
 		<td>
 			<select name='eventFilter'>
 				<?php
+						// Is een event filter ingesteld? Selecteer deze opnieuw
 						if(isset($_POST['eventFilter']) AND $_POST['eventFilter'] == 'account') {
 								echo "
 								<option value=''></option>
@@ -132,6 +142,7 @@ foreach($sourcesArray as $source) {
 		<td>
 			<select name='allowedFilter'>
 			<?php
+				// Wordt er gefilterd op 'toegestaan'? Selecteer deze opnieuw
 				if(isset($_POST['allowedFilter']) AND $_POST['allowedFilter'] == '0') {
 						echo "
 							<option value='2'></option>
@@ -164,6 +175,7 @@ foreach($sourcesArray as $source) {
 		<td>
 			<select name='sortColumn'>
 			<?php
+				// Wordt er gesorteerd op een kolom? Selecteer deze opnieuw
 				if(isset($_POST['sortColumn']) AND $_POST['sortColumn'] == 'ip') {
 						echo "
 							<option value='ip' SELECTED>IP adres</option>
@@ -189,6 +201,7 @@ foreach($sourcesArray as $source) {
 		<td>
 			<select name='sortDirection'>
 			<?php
+				// Wordt er gesorteerd op een richting? Selecteer deze opnieuw
 				if(isset($_POST['sortDirection']) AND $_POST['sortDirection'] == 'ASC') {
 						echo "
 							<option value='ASC' SELECTED>Oplopend</option>
@@ -208,9 +221,9 @@ foreach($sourcesArray as $source) {
 </table>
 </form>
 <?php
+// Er is een filter gekozen
 if(isset($_POST['setFilter'])) {
-
-
+		// Filters bewaren in een compatibel formaat
 		if(isset($_POST['dateYear']) AND $_POST['dateYear'] != "") {
 				$yearFilter = intval($_POST['dateYear']);
 			} else {
@@ -256,13 +269,17 @@ if(isset($_POST['setFilter'])) {
 			} else {
 				$sortDirection = "DESC";
 		}
+		
+		// Logs ophalen met filters
 		$logsArray = $loggingService->getLogs($yearFilter,$monthFilter,$dayFilter, $sourceFilter, $eventFilter, $_POST['textFilter'], $allowedFilter, $sortColumn, $sortDirection);
 
 	} else {
+		// Logs ophalen met standaard filters
 		$logsArray = $loggingService->getLogs(date('Y',time()),date('m',time()),0, 0, "" ,"",2, "timestamp", "DESC");
 }
 
 ?>
+<!-- overzicht logs -->
 <table class="listingtable">
 	<tr>
 		<th>Tijdstip</th>
@@ -281,6 +298,8 @@ if(isset($_POST['setFilter'])) {
    				$actionPassed = false;
    				$passvalue = "Nee";
    		}
+   		
+   		// Is deze gebeurtenis mislukt? Maak de rij dan rood
    		if($actionPassed == false) {
    				echo "<tr style='color: red;' onclick='toggleLogDetails(".$logitem['logid'].")'>";
    			} else {
@@ -293,6 +312,7 @@ if(isset($_POST['setFilter'])) {
    			echo "<td>".$logitem['event']."</td>";
    			echo "<td>".$passvalue."</td>";
    		echo "</tr>";
+   		// Extra rijen met details, standaard verbergen
    		echo "<tr class='detailsRow_".$logitem['logid']."' style='display: none;'>";
    			echo "<th>Browser</th>";
    			echo "<td colspan='5'><pre>".$logitem['useragent']."</pre></td>";
@@ -316,6 +336,7 @@ if(isset($_POST['setFilter'])) {
     ?>
 </table>
 <script type='text/javascript'>
+// Toont/verbergt extra rijen met details
 function toggleLogDetails(logid) {
 		if($('.detailsRow_'+logid).css('display') == 'table-row') {
 				$('.detailsRow_'+logid).css('display','none');

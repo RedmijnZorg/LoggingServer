@@ -1,5 +1,7 @@
 <?php
-
+/**
+Authenticator module
+**/
 class GoogleAuthenticator
 {
     protected $_codeLength = 6;

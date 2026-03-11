@@ -1,8 +1,8 @@
 <html>
 <head>
-
 </head>
 <body>
+<!-- configuratie formulier -->
 <h1>Configuratie</h1>
 <form method="post">
     <b>Database</b>
@@ -50,8 +50,10 @@
     <input type="submit" name="setconfig" value="Doorgaan">
 </form>
 <?php
+// Formulier is ingevuld
 if(isset($_POST['setconfig'])) {
 
+	// Gegevens database opslaan
     if(!isset($_POST['dbhost']) || empty($_POST['dbhost'])) {
         echo "Geef een database hostname op!";
         exit();
@@ -70,12 +72,16 @@ if(isset($_POST['setconfig'])) {
         exit();
     }
 
+	// Proberen te verbinden met database voor bootstrapping
     $connectionAttempt = new mysqli($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'],$_POST['dbname']);
+    
+    // Lukt de verbinding niet? Stop met een foutmelding
     if($connectionAttempt->connect_error) {
         echo "Kon niet met de database verbinden!";
         exit();
     }
 
+	// Vereiste velden controleren
     if(!isset($_POST['appname']) || empty($_POST['appname'])) {
         echo "Geef een naam op voor deze app!";
         exit();
@@ -85,7 +91,6 @@ if(isset($_POST['setconfig'])) {
         echo "Geef een logo pad op voor deze app!";
         exit();
     }
-
 
     if(!isset($_POST['apphostname']) || empty($_POST['apphostname'])) {
         echo "Geef een hostname op voor deze app!";
@@ -101,12 +106,16 @@ if(isset($_POST['setconfig'])) {
         $_POST['logretention'] = 0;
     }
     
+    // Parameters gereed maken voor de database
  	$logretention = $connectionAttempt->real_escape_string($_POST['logretention']);
+ 	
+ 	// Configuratie legen
     $connectionAttempt->query("TRUNCATE `configuration`");
-
+	
+	// Configuratie vullen
     $connectionAttempt->query("INSERT INTO `configuration` (`item`,`value`) VALUES ('LOGGING_RETENTION_DAYS','$logretention')");
-    $connectionAttempt->query("INSERT INTO `users` (`fullname`,`email`,`password`) VALUES ('admin','admin','c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec')");
 
+	// Configuratiebestand invullen
     $template = file_get_contents("configtemplate");
     $template = str_replace("DATABASE_HOSTNAME",$_POST['dbhost'],$template);
     $template = str_replace("DATABASE_USERNAME",$_POST['dbuser'],$template);
@@ -116,8 +125,9 @@ if(isset($_POST['setconfig'])) {
     $template = str_replace("APP_LOGO",$_POST['applogo'],$template);
     $template = str_replace("APP_HOSTNAME",$_POST['apphostname'],$template);
     $template = str_replace("EMAIL_FROM",$_POST['mailfrom'],$template);
-
     file_put_contents(__dir__."/../secure/config.php",$template);
+    
+    // Doorgaan naar het genereren van de sleutel
     header("location: /Install/genkey.php");
 }
 ?>

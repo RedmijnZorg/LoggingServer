@@ -1,5 +1,7 @@
 <?php
-
+/**
+Maakt verbindingen via cURL
+**/
 class ConnectionService
 {
 
@@ -13,23 +15,33 @@ class ConnectionService
      * @param bool $verifyHost
      * @return void
      */
-    public function setVerifyHost($verifyHost){
-        curl_setopt($this->connection, CURLOPT_SSL_VERIFYHOST, $verifyHost);
+    public function setVerifyHost(bool $verifyHost){
+    	if($verifyHost) {
+        		curl_setopt($this->connection, CURLOPT_SSL_VERIFYHOST, 2);
+    		} else {
+        		curl_setopt($this->connection, CURLOPT_SSL_VERIFYHOST, 0);
+    	}
     }
 
     /**
      * @param bool $verifyPeer
-     * @return bool
+     * @return void
      */
-    public function setVerifyPeer($verifyPeer){
-        return curl_setopt($this->connection, CURLOPT_SSL_VERIFYPEER, $verifyPeer);
+    public function setVerifyPeer(bool $verifyPeer){
+    	if($verifyPeer) {
+        		curl_setopt($this->connection, CURLOPT_SSL_VERIFYPEER, 2);
+    		} else {
+        		curl_setopt($this->connection, CURLOPT_SSL_VERIFYPEER, 0);
+    	}
     }
 
     /**
+     * Headers instellen
+     *
      * @param $headers
      * @return bool
      */
-    public function setHeaders($headers = array()) {
+    public function setHeaders(array $headers = array()) {
         $headersRebuilt = array();
         foreach ($headers as $key => $value) {
             $headersRebuilt[] = $key.": ".$value;
@@ -38,11 +50,13 @@ class ConnectionService
     }
 
     /**
+     * Een GET-verzoek uitvoeren
+     *
      * @param string $url
      * @param array $params
      * @return bool|string
      */
-    public function getRequest($url, $params = array()) {
+    public function getRequest(string $url, array $params = array()) {
         if(count($params) > 0) {
             $url .= '?'.http_build_query($params);
         }
@@ -54,12 +68,14 @@ class ConnectionService
     }
     
     /**
+     * Een POST-verzoek uitvoeren
+     *
      * @param string $url
      * @param string data
      * @param array $params
      * @return bool|string
      */
-    public function postRequest($url, $data, $params = array()) {
+    public function postRequest(string $url, string $data, array $params = array()) {
         if(count($params) > 0) {
             $url .= '?'.http_build_query($params);
         }
@@ -72,6 +88,8 @@ class ConnectionService
     }
 
     /**
+     * De laatste HTTP-code opvragen
+     *
      * @return mixed
      */
     public function getHTTPcode() {

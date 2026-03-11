@@ -1,13 +1,18 @@
 <?php
+// Wordt dit script direct geopend zonder router? Redirect dan naar de juiste pagina.
 if (!isset($routerActive)) {
     ob_start();
     header("location: /bronnen");
     exit();
 }
+
+// Classes laden
 $sourceManager = new SourceManager($database);
 
+// Alle bronnen laden
 $sourcesArray = $sourceManager->getAllsources();
 ?>
+<!-- tabel met bronnen -->
 <div id="bodycontainer">
 <h1>Bronnen beheren</h1>
 <table class="listingtable">
@@ -34,74 +39,92 @@ $sourcesArray = $sourceManager->getAllsources();
 </table><br>
     <button type="button" class="button" onclick="switchOverlay(); $('#addsource').css('display','block'); $('#sourcename').focus();">Bron toevoegen</button>
 </div>
-    <div class="message-container" id="addsource" style="display:none; height: 300px; width: 600px;">
-        <p class="message-title">Bron toevoegen</p>
+<!-- Venster voor toevoegen nieuwe bron -->
+<div class="message-container" id="addsource" style="display:none; height: 300px; width: 600px;">
+	<p class="message-title">Bron toevoegen</p>
 
-    <form method="post" action="" id="addsourceform">
-        <input type="hidden" name="addnewsource" value="1">
-        <table>
-            <tr>
-                <th>Naam</th>
-                <td><input type="text" name="sourcename" id="sourcename" onkeyup="verifyAddsource();"></td>
-            </tr>
-        </table>
-        <span class="errormessage" id="erroradd"></span>
-        <div class="buttons-container">
-            <button type="button" class="button disabled" id='savenewsourcebutton' onclick="$('#addsourceform').submit();" disabled>
-                Opslaan
-            </button>
-            <button type="button" class="button" onclick="switchOverlay(); $('#addsource').css('display','none');">
-                Annuleren
-            </button>
-        </div>
-    </form>
-    </div>
+<form method="post" action="" id="addsourceform">
+	<input type="hidden" name="addnewsource" value="1">
+	<table>
+		<tr>
+			<th>Naam</th>
+			<td><input type="text" name="sourcename" id="sourcename" onkeyup="verifyAddsource();"></td>
+		</tr>
+	</table>
+	<span class="errormessage" id="erroradd"></span>
+	<div class="buttons-container">
+		<button type="button" class="button disabled" id='savenewsourcebutton' onclick="$('#addsourceform').submit();" disabled>
+			Opslaan
+		</button>
+		<button type="button" class="button" onclick="switchOverlay(); $('#addsource').css('display','none');">
+			Annuleren
+		</button>
+	</div>
+</form>
+</div>
 
-    <div class="message-container" id="deletesource" style="display:none; height: 300px;">
-        <p class="message-title">Bron verwijderen</p>
-        <form method="post" action="" id="deletesourceform">
-            <input type="hidden" name="sourceidDelete" id="sourceiddelete" />
-            <div class="input-container" style="text-align: center; padding-bottom: 15px">
-                Weet u zeker dat u deze bron wilt verwijderen?
-            </div>
-            <div class="buttons-container">
-                <button type="button" class="button" onclick="$('#deletesourceform').submit();">
-                    Ja
-                </button>
-                <button type="button" class="button" onclick="switchOverlay(); $('#deletesource').css('display','none');">
-                    Nee
-                </button>
-            </div>
-        </form>
-    </div>
+<!-- Venster voor verwijderen bestaande bron -->
+<div class="message-container" id="deletesource" style="display:none; height: 300px;">
+	<p class="message-title">Bron verwijderen</p>
+	<form method="post" action="" id="deletesourceform">
+		<input type="hidden" name="sourceidDelete" id="sourceiddelete" />
+		<div class="input-container" style="text-align: center; padding-bottom: 15px">
+			Weet u zeker dat u deze bron wilt verwijderen?
+		</div>
+		<div class="buttons-container">
+			<button type="button" class="button" onclick="$('#deletesourceform').submit();">
+				Ja
+			</button>
+			<button type="button" class="button" onclick="switchOverlay(); $('#deletesource').css('display','none');">
+				Nee
+			</button>
+		</div>
+	</form>
+</div>
+
 
 
 <?php
+// Toevoegen nieuwe bron
 if(isset($_POST['addnewsource'])) {
     $name = $_POST['sourcename'];
 
+	// Is er geen naam opgegeven? Toon een foutmelding
     if($name == "") {
         echo "<script>showErrorMessage('Naam ontbreekt','Vul a.u.b. een naam in!');</script>";
         exit();
     }
 
+	// Bron toevoegen
     $addsource = $sourceManager->addSource($name);
+    
     if($addsource) {
+    	// Is het toevoegen gelukt? Pagina verversen
         header("location: /bronnen");
     } else {
+    	// Is het toevoegen niet gelukt? Toon een foutmelding
         echo "<script>showErrorMessage('Fout','Er is een fout opgetreden!');</script>";
         exit();
     }
 }
 
+// Verwijderen bestaande bron
 if(isset($_POST['sourceidDelete'])) {
+
+	// Haal het id op van de bevestigingsprompt
     $sourceid_found = $_POST['sourceidDelete'];
+    
+    // Verwijder de app
     $deletesource = $sourceManager->deleteSource($sourceid_found);
+    
     if($deletesource) {
+    	// Is het verwijderen gelukt? Pagina verversen
         header("location: /bronnen");
-    } else {
+    	} else {
+    	// Is het verwijderen niet gelukt? Toon een foutmelding
         echo "<script>showErrorMessage('Fout','Er is een fout opgetreden!');</script>";
-        exit();    }
+        exit();    
+    }
 }
 
 ?>

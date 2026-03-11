@@ -1,5 +1,7 @@
 <?php
-
+/**
+Beheer van log bronnen
+**/
 class SourceManager
 {
 
@@ -8,65 +10,86 @@ class SourceManager
     /**
      * @param mysqli $database
      */
-    public function __construct($database) {
+    public function __construct(mysqli $database) {
         $this->database = $database;
     }
 
     /**
+     * Voegt een nieuwe bron toe
+     *
      * @param string $name
      * @return false|int
      */
-    public function addSource($name) {
+    public function addSource(string $name) {
         $name = $this->database->real_escape_string($name);
         $cryptoService = new CryptoService();
         $token = $cryptoService->generateUUID();
 
+		// Bron toevoegen
         $addsource = $this->database->query("INSERT INTO sources (name, token,lastsignal) VALUES ('$name', '$token','0')");
         if ($addsource) {
+        	// Is het gelukt? Geef het nieuwe id terug
             return $this->database->insert_id;
         } else {
+        	// Is het niet gelukt? Geef 'false' terug
             return false;
         }
     }
 
     /**
+     * Haalt de details van een bron op
+     *     
      * @param int $sourceid
      * @return array|false
      */
-    public function getSourceDetails($sourceid) {
+    public function getSourceDetails(int $sourceid) {
         $sourceid = $this->database->real_escape_string($sourceid);
+        
+        // De bron opzoeken
         $getsource = $this->database->query("SELECT * FROM sources WHERE sourceid = '$sourceid'");
         if($getsource->num_rows != 0) {
+        	// Is de bron gevonden? Geef de details terug
             $sourcedetails = $getsource->fetch_assoc();
             return $sourcedetails;
         } else {
+        	// Is de bron niet gevonden? Geef 'false' terug
             return false;
         }
     }
 
     /**
+     * Zoekt een bron op basis van een token
+     *     
      * @param $token
      * @return array|false
      */
-    public function getSourceByToken($token) {
+    public function getSourceByToken(string $token) {
         $token = $this->database->real_escape_string($token);
+        
+        // Zoek de bron die bij dit token past
         $getsource = $this->database->query("SELECT `sourceid` FROM sources WHERE token = '$token'");
         if($getsource->num_rows != 0) {
+        	// Is de bron gevonden? Geef de details terug
             $sourceDetails = $getsource->fetch_assoc();
             return $this->getSourceDetails($sourceDetails['sourceid']);
         } else {
+        	// Is de bron niet gevonden? Geef 'false' terug
             return false;
         }
     }
 
     /**
+     * Haalt alle bronnen op
+     *
      * @return array
      */
     public function getAllsources() {
+    	// Alle bronnen ophalen
         $getsources = $this->database->query("SELECT `sourceid` FROM sources ORDER BY name ASC");
         $returnArray = array();
 
         if($getsources->num_rows != 0) {
+        	// Voeg de details toe aan de array
             while($sourceDetails = $getsources->fetch_assoc()) {
                 $returnArray[] = $this->getSourceDetails($sourceDetails['sourceid']);
             }
@@ -75,31 +98,41 @@ class SourceManager
     }
 
     /**
+     * Verwijdert een bron
+     *
      * @param int $sourceid
      * @return bool|mysqli_result
      */
-    public function deleteSource($sourceid) {
+    public function deleteSource(int $sourceid) {
         $sourceid = $this->database->real_escape_string($sourceid);
         return $this->database->query("DELETE FROM sources WHERE sourceid = '$sourceid'");
     }
 
     /**
+     * Haalt de token uit de headers en zoekt de bijbehorende bron op
+     *
      * @return array|false
      */
     public function getSourceFromHeaders() {
         $headers = getallheaders();
+        
+        // Zoeken naar de header 'X-APP-TOKEN'
         if(isset($headers['X-APP-TOKEN'])) {
+        	// Is de header gevonden? Zoek de bron op basis van deze waarde en geef het resultaat
             $token = $headers['X-APP-TOKEN'];
             return $this->getSourceByToken($token);
         } else
+        	// Is de header niet gevonden? Geef 'false' terug
             return false;
     }
     
     /**
+     * Registreert het laaste signaal van deze bron
+     *
      * @param int $sourceid
      * @return bool
      */
-    public function updateSourceSignal($sourceid) {
+    public function updateSourceSignal(int $sourceid) {
         $sourceid = $this->database->real_escape_string($sourceid);
         $timestamp = time();
         return $this->database->query("UPDATE sources SET lastsignal = '$timestamp' WHERE sourceid = '$sourceid'");

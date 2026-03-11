@@ -1,5 +1,7 @@
 <?php
-
+/**
+Genereert e-mails
+**/
 class MailerService
 {
     private $fromAddress;
@@ -8,38 +10,48 @@ class MailerService
     private $subject;
 
     /**
+     * Het 'van' adres opgeven
+     *
      * @param $fromAddress
      * @return void
      */
-    public function setFromAddress($fromAddress) {
+    public function setFromAddress(string $fromAddress) {
         $this->fromAddress = $fromAddress;
     }
 
     /**
+     * Het 'naar' adres opgeven
+     *
      * @param $toAddress
      * @return void
      */
-    public function setToAddress($toAddress) {
+    public function setToAddress(string $toAddress) {
         $this->toAddress = $toAddress;
     }
 
     /**
+     * Het onderwerp opgeven
+     *
      * @param $subject
      * @return void
      */
-    public function setSubject($subject) {
+    public function setSubject(string $subject) {
         $this->subject = $subject;
     }
 
     /**
+     * De inhoud van de mail opgeven
+     *
      * @param $mailbody
      * @return void
      */
-    public function setMailbody($mailbody) {
+    public function setMailbody(string $mailbody) {
         $this->mailbody = $mailbody;
     }
 
     /**
+     * Mail in HTML-formaat sturen
+     *
      * @return void
      */
     public function sendHTML() {
@@ -52,6 +64,8 @@ class MailerService
     }
 
     /**
+     * Mail in platte tekst sturen
+     *
      * @return void
      */
     public function send() {

@@ -1,5 +1,7 @@
 <?php
-
+/**
+Beheer van gebruikers
+**/
 class UserOperations
 {
     private $database;
@@ -8,15 +10,17 @@ class UserOperations
     /**
      * @param mysqli $database
      */
-    public function __construct($database) {
+    public function __construct(mysqli $database) {
         $this->database = $database;
     }
 
     /**
+     * Details gebruiker ophalen
+     *
      * @param int $userid
      * @return array
      */
-    public function getUserDetails($userid) {
+    public function getUserDetails(int $userid) {
         $userid = $this->database->real_escape_string($userid);
         $getuser = $this->database->query("SELECT * FROM users WHERE `userid` = '" . $userid . "'");
         if ($getuser->num_rows == 0) {
@@ -39,49 +43,68 @@ class UserOperations
     }
 
     /**
+     * Gebruiker toevoegen
+     *
      * @param string $email
      * @param string $password
      * @param string $fullname
      *
      * @return int|bool
      */
-    public function addUser($email, $password, $fullname) {
+    public function addUser(string $email, string $password, string $fullname) {
         $email = $this->database->real_escape_string($email);
+        
+        // Wachtwoord hashen in sha512
         $password = hash('sha512', $password);
         $findMatchingUser = $this->database->query("SELECT `userid` FROM users WHERE `email` = '" . $email . "'");
+        
+        // Is er al een gebruiker met deze gegevens? Geef 'false' terug
         if($findMatchingUser->num_rows > 0) {
             return false;
         } else {
+        	// Is er geen match? Voeg dan de gebruiker toe
             $adduser = $this->database->query("INSERT INTO `users` (`password`,`email`,`fullname`,`changepassword`,`locked`) VALUES('$password','$email','$fullname','1','0')");
             if($adduser) {
+            	// Is het gelukt? Geef dan het id terug
                 return $this->database->insert_id;
             } else {
+                // Is het niet gelukt? Geef dan 'false' terug
                 return false;
             }
         }
     }
 
     /**
+     * Gebruiker bewerken
+     *
      * @param int $userid
      * @param string $fullname
      * @param string $email
      * @return bool
      */
-    public function updateUser($userid, $fullname,$email) {
+    public function updateUser(int $userid, string $fullname, string $email) {
+    	// Query opbouwen
         $querystring = "UPDATE `users` SET ";
         $querystringappend = "";
         $userid = $this->database->real_escape_string(json_encode(intval($userid)));
 
+		// Is de naam niet leeg? Neem die dan mee in de query
         if($fullname != "") {
             $querystringappend .= "`fullname` = '" . $fullname . "'";
         }
+        
+		// Is de e-mail niet leeg? Neem die dan mee in de query
         if($email != "") {
             $querystringappend .= ", `email` = '" .$this->database->real_escape_string($email) . "' ";
         }
+        
+        // Query aan elkaar plakken
         if(substr($querystringappend, 0,2) == ", ") {
             $querystringappend = substr($querystringappend, 2, strlen($querystringappend) - 2);
         }
         $querystring .= $querystringappend." WHERE `userid` = '" . $userid . "'";
+        
+        // Query uitvoeren
         $updateuser = $this->database->query($querystring);
         if($updateuser) {
             return true;
@@ -91,10 +114,12 @@ class UserOperations
     }
 
     /**
+     * Gebruiker verwijderen
+     *
      * @param int $userid
      * @return bool
      */
-    public function deleteUser($userid) {
+    public function deleteUser(int $userid) {
         $userid = $this->database->real_escape_string($userid);
         $deleteuser = $this->database->query("DELETE FROM `users` WHERE `userid` = '" . $userid . "'");
         if($deleteuser) {
@@ -105,11 +130,12 @@ class UserOperations
     }
 
     /**
+     * Gebruiker vergrendelen
+     *
      * @param int $userid
      * @return bool
      */
-    public function lockUser($userid)
-    {
+    public function lockUser(int $userid) {
         $userid = $this->database->real_escape_string($userid);
         $lockuser = $this->database->query("UPDATE `users` SET `locked` = '1' WHERE `userid` = '" . $userid . "'");
         if($lockuser) {
@@ -120,10 +146,12 @@ class UserOperations
     }
 
     /**
+     * Gebruiker ontgrendelen
+     *
      * @param int $userid
      * @return bool
      */
-    public function unlockUser($userid){
+    public function unlockUser(int $userid){
         $userid = $this->database->real_escape_string($userid);
         $unlockuser = $this->database->query("UPDATE `users` SET `locked` = '0' WHERE `userid` = '" . $userid . "'");
         if($unlockuser) {
@@ -134,13 +162,17 @@ class UserOperations
     }
 
     /**
+     * Wachtwoord wijzigen
+     *
      * @param int $userid
      * @param string $password
      * @param bool $requireChange
      * @return bool
      */
-    public function changePassword($userid, $password, $requireChange = false) {
+    public function changePassword(int $userid, string $password, bool $requireChange = false) {
         $userid = $this->database->real_escape_string($userid);
+        
+        // Wachtwoord opslaan in hash sha512
         $password = hash('sha512', $password);
         if($requireChange) {
             $updatePassword = $this->database->query("UPDATE `users` SET `password` = '$password',`changepassword` = '1',`resettoken` = '' WHERE `userid` = '" . $userid . "'");
@@ -155,20 +187,27 @@ class UserOperations
     }
 
     /**
+     * Mislukte logins verhogen
+     *
      * @param int $userid
      * @return bool
      */
-    public function increaseFailedLogins($userid) {
+    public function increaseFailedLogins(int $userid) {
         $userid = $this->database->real_escape_string($userid);
+        
+        // Gebruiker opzoeken
         $getuser = $this->database->query("SELECT `failedlogins` FROM `users` WHERE `userid` = '" . $userid . "'");
         if($getuser->num_rows > 0) {
+        	// Is deze gevonden? Neem het aantal mislukte logins en tel 1 op
             $userdetails = $getuser->fetch_assoc();
             $failedloginsFound = $userdetails['failedlogins'];
             $failedlogins = $failedloginsFound+1;
+            // Is het aantal mislukte logins 10 of hoger? Vergrendel dan het account
             if($failedlogins >= 10) {
                 $this->lockUser($userid);
                 $updateFailedLogins = true;
             } else {
+            	// Is het onder 10? Registreer het dan in de database
                 $updateFailedLogins = $this->database->query("UPDATE `users` SET `failedlogins` = '$failedlogins' WHERE `userid` = '" . $userid . "'");
             }
             if($updateFailedLogins) {
@@ -182,19 +221,23 @@ class UserOperations
     }
 
     /**
+     * Mislukte logins resetten
+     *
      * @param int $userid
      * @return mixed
      */
-    public function resetFailedLogins($userid) {
+    public function resetFailedLogins(int $userid) {
         $userid = $this->database->real_escape_string($userid);
         return $this->database->query("UPDATE `users` SET `failedlogins` = '$failedlogins' WHERE `userid` = '" . $userid . "'");
     }
 
     /**
+     * Laatste login bijwerken
+     *
      * @param int $userid
      * @return bool
      */
-    public function updateLastLogin($userid) {
+    public function updateLastLogin(int $userid) {
         $userid = $this->database->real_escape_string($userid);
         $timestamp = time();
         $updateLastLogin = $this->database->query("UPDATE `users` SET lastlogin = '$timestamp' WHERE `userid` = '" . $userid . "'");
@@ -206,6 +249,8 @@ class UserOperations
     }
 
     /**
+     * Alle gebruikers ophalen
+     *
      * @return array
      */
     public function getAllUsers() {
@@ -220,10 +265,12 @@ class UserOperations
     }
 
     /**
+     * Gebruiker opzoeken via reset token
+     *
      * @param string $resettoken
      * @return array|false
      */
-    public function getUserByResetToken($resettoken = "")
+    public function getUserByResetToken(string $resettoken = "")
     {
       if($resettoken == "") {
           return false;
@@ -239,11 +286,13 @@ class UserOperations
     }
 
     /**
+     * Authenticator secret instellen voor gebruiker
+     *
      * @param int $userid
      * @param string $secret
      * @return mixed
      */
-    public function setUser2FASecret($userid, $secret = "") {
+    public function setUser2FASecret(int $userid, string $secret = "") {
         $userid = $this->database->real_escape_string($userid);
         $secret = $this->database->real_escape_string($secret);
 
@@ -253,10 +302,12 @@ class UserOperations
     }
 
     /**
+     * Reset token toewijzen aan gebruiker
+     *
      * @param int $userid
      * @return string|bool
      */
-    public function assignResetToken($userid) {
+    public function assignResetToken(int $userid) {
         $userid = $this->database->real_escape_string($userid);
         $cryotoservice = new CryptoService();
         $resettoken = $cryotoservice->generateUUID();
@@ -269,16 +320,18 @@ class UserOperations
     }
 
     /**
+     * Gebruiker zoeken via e-mail
+     *
      * @param string $email
-     * @return false|mixed
+     * @return false|int
      */
-    public function findUserByEmail($email) {
+    public function findUserByEmail(string $email) {
         $email = $this->database->real_escape_string($email);
         $getuser = $this->database->query("SELECT `userid` FROM `users` WHERE `email` = '" . $email . "'");
         if($getuser->num_rows > 0) {
             $userdetails = $getuser->fetch_assoc();
             $userid = $userdetails['userid'];
-            return $userid;;
+            return $userid;
         } else {
             return false;
         }

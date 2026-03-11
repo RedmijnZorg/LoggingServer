@@ -1,7 +1,8 @@
 <?php
+/** routes **/
 $publicRoutes = array();
 $privateRoutes = array();
-$noHTMLRoutes = array();
+$apiRoutes = array();
 
 $defaultroute = "index.php"; // de standaard route indien geen pad opgegeven
 
@@ -31,7 +32,7 @@ $privateRoutes["/"] = "index.php";
 
 
 /**
- * API routes
+ * API routes, deze worden gebruikt zonder HTML opmaak en in JSON formaat
  */
 $apiRoutes["/ajax/getuserdetails"] = "Ajax/getUserDetails.php";
 $apiRoutes["/api/receiver"] = "API/logsReceiver.php";

@@ -1,12 +1,15 @@
 <?php
+// Wordt dit script direct geopend zonder router? Redirect dan naar de juiste pagina.
 if(!isset($routerActive)) {
     ob_start();
     header("location: /login");
     exit();
 }
-
+// Classes laden
 $loginOperations = new LoginOperations($database);
 ?>
+
+<!-- login formulier -->
 <form method="post">
 <div class="message-container">
     <p class="message-title"><?php echo $config['app']['name'];?></p>
@@ -26,22 +29,38 @@ $loginOperations = new LoginOperations($database);
 </div>
 </form>
 
-
 <?php
+// Formulier ingevuld
 if(isset($_POST["submit"])){
+
+	// E-mail en wachtwoord combinatie controlerren
     $login = $loginOperations->login($_POST["email"], $_POST["password"]);
+    
+    // Combinatie onjuist?
     if($login == false) {
+    	//  toon foutmelding
         echo "<script>showErrorMessage('Inloggen mislukt','Jouw accountgegevens zijn onjuist of je account is geblokkeerd!');</script>";
         exit();
+        // Combinatie juist?
     } else {
+    	// Stel cookiedomein in
         ini_set('session.cookie_domain',$config['app']['cookiedomain']);
+        
+        // Start de sessie
         session_start();
+        
+        // Bewaar gegevens van gebruiker in sessie
         $_SESSION["user"] = $login;
+        
+        // 2FA controle moet nog plaatsvinden, dus deze moet op 'false' staan
         $_SESSION["user"]['2fapass'] = false;
 
+		// Doorsturen naar startpagina, dit wordt waarschijnlijk de 2FA verificatie
         header("location: /");
     }
 }
 ?>
-
-<script>$('#emailbox').focus();</script>
+<script>
+// E-mail selecteren
+$('#emailbox').focus();
+</script>

@@ -1,14 +1,17 @@
 <?php
+// Wordt dit script direct geopend zonder router? Redirect dan naar de juiste pagina.
 if(!isset($routerActive)) {
     ob_start();
     header("location: /resetrequest");
     exit();
 }
-$userOperations = new UserOperations($database);
 
+// Classes laden
+$userOperations = new UserOperations($database);
 ?>
+<!-- herstelformulier -->
 <form method="post">
-    <div class="message-container" style="height: 280px">
+    <div class="message-container" style="height: 280px;  z-index: -1;">
         <p class="message-title">Account herstellen</p>
         <div class="input-container">
             <input type="email" name="email" placeholder="E-mailadres">
@@ -24,13 +27,21 @@ $userOperations = new UserOperations($database);
 </form>
 
 <?php
+// Formulier is ingevuld
 if(isset($_POST["submit"])){
+
+	// Controleer of er een gebruiker met dit mailadres bestaat
     $finduser = $userOperations->findUserByEmail($_POST["email"]);
+    
+    // Is de gebruiker gevonden?
     if($finduser) {
+    
+    	// Reset token toewijzen
         $resettoken = $userOperations->assignResetToken($finduser);
 
+		// Is een reset token toegewezen?
         if($resettoken) {
-            $loggingService->logEvent($_POST["email"], $_SERVER['REQUEST_URI'], "account", "Assigning reset token ".$resettoken, 1);
+            // Genereer een e-mail
             $renderService = new RenderService();
             $renderService->setTitle('Wachtwoord opnieuw instellen');
             $mailerService = new MailerService();
@@ -44,17 +55,21 @@ if(isset($_POST["submit"])){
             $renderService->setbuttonurl($config['app']['hostname']."/reset?token=".$resettoken);
             $renderService->setFootertext($config['app']['name']);
             $emailcontents = $renderService->renderMail(true);
+            
+            // Is er geen e-mail gegenereerd? Dan gaat er iets mis. Toon foutmelding en stop meteen
             if($emailcontents == false) {
                 echo "<script>showErrorMessage('Fout','Er is een fout opgetreden!');</script>";
                 exit();
             }
 
+			// Is de e-mail wel gegenereerd? Stuur deze dan naar de gebruiker
             $mailerService->setMailbody($emailcontents);
             $mailerService->sendHTML();
         }
     }
+    
+    // Bevestiging tonen, ongeacht dit wel of niet is gelukt om te voorkomen dat we teveel informatie aan kwaadwillenden geven
     echo "<script type='text/javascript'>setErrorMessage('successmessage','Als dit e-mailadres bij ons bekend is, zal u de herstelinstructies ontvangen in uw mailbox.');</script>";
 }
 ?>
-
 

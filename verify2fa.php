@@ -1,15 +1,18 @@
 <?php
+// Wordt dit script direct geopend zonder router? Redirect dan naar de juiste pagina.
 if(!isset($routerActive)) {
     ob_start();
     header("location: /controle");
     exit();
 }
+
+// Classes laden
 $googleAuthenticator = new GoogleAuthenticator();
 $userOperations = new UserOperations($database);
 $userDetails = $userOperations->getUserDetails($_SESSION['user']['userid']);
 ?>
-
-    <div class="message-container" id='twofacontainer' style="height: 200px;">
+<!-- 2FA controleformulier -->
+<div class="message-container" id='twofacontainer' style="height: 200px;">
 
 <form id="twofaform" name="overLayForm" action="" method="post"
   autocomplete="off">
@@ -57,18 +60,30 @@ $userDetails = $userOperations->getUserDetails($_SESSION['user']['userid']);
   </form>
 </div>
 <?php
+// 2FA code is ingevoerd
 if(isset($_POST["submitform"])){
+
+	// Is de responscode ingevoerd en is deze 6 tekens lang?
     if(isset($_POST["2facode"]) AND count($_POST["2facode"]) == 6){
-       $verifycode = $googleAuthenticator->verifyCode($userDetails['2fa'], implode($_POST["2facode"]));
-       if($verifycode){
+    
+    	// Controleer de responscode met het secret
+		$verifycode = $googleAuthenticator->verifyCode($userDetails['2fa'], implode($_POST["2facode"]));
+		
+		if($verifycode){
+			// Bewaar de status van de gelukte 2FA controle in de sessie
 			$_SESSION["user"]['2fapass'] = true;
+			
+			// Startpagina openen
 			header("location: /");
-       } else {
+		} else {
+			// Is de code onjuist? toon foutmelding
 			echo "<script type='text/javascript'>setErrorMessage('twofaerror','Code onjuist of verlopen!'); $('#digit1').focus();</script>";
-       }
+		}
    } else {
-       echo "<script type='text/javascript'>setErrorMessage('twofaerror','Code is verplicht!');</script>";
+		// Is de responscode niet ingevoerd of geen 6 tekens lang? Toon foutmelding
+        echo "<script type='text/javascript'>setErrorMessage('twofaerror','Code is verplicht!');</script>";
    }
 }
 ?>
+<!-- code voor aansturing formulier inladen -->
 <script src="Assets/verify2fa.js?rand=<?php echo uniqid(time());?>"></script>

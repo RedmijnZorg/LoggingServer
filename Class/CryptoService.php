@@ -1,40 +1,47 @@
 <?php
-/*
- * Encrypts and decrypts data
- */
+/**
+Verwerking van versleutelde data
+**/
 class CryptoService
 {
     private $privateKey;
 
     /**
-     * Sets the private key location
+     * Locatie van de private key opgeven
+     *
      * @param string $privateKeyLocation
      * @return void
      */
-    public function setPrivateKeyLocation($privateKeyLocation) {
+    public function setPrivateKeyLocation(string $privateKeyLocation) {
         $this->privateKey = file_get_contents($privateKeyLocation);
     }
 
     /**
+     * Tekst versleutelen
+     *
      * @param string $input
      * @return string
      */
-    public function encryptData($input = "") {
+    public function encryptData(string $input = "") {
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
         $encrypted = openssl_encrypt($input, 'aes-256-cbc', $this->privateKey, 0, $iv);
         return base64_encode($encrypted . '::' . $iv);
     }
 
     /**
+     * Versleutelde tekst ontcijferen
+     *
      * @param string $input
      * @return false|string
      */
-    public function decryptData($input = "") {
+    public function decryptData(string $input = "") {
         list($encrypted_data, $iv) = explode('::', base64_decode($input), 2);
         return openssl_decrypt($encrypted_data, 'aes-256-cbc', $this->privateKey, 0, $iv);
     }
 
     /**
+     * Een UUID genereren
+     *
      * @return string
      */
     public function generateUUID() {
@@ -46,6 +53,8 @@ class CryptoService
     }
 
     /**
+     * Een wachtwoord genereren
+     *
      * @return string
      */
    public function generatePassword() {
@@ -60,38 +69,36 @@ class CryptoService
     }
 
     /**
+     * Data ondertekenen met een private key
+     *
      * @param string $content
      * @param string $privatekey
      * @return string
      */
-    public function signData($content, $privatekey) {
-
+    public function signData(string $content, string $privatekey) {
         $privateKeyId = openssl_pkey_get_private($privatekey);
-
         openssl_sign($content, $signature, $privateKeyId, 'RSA-SHA256');
-
         $base64Str = base64_encode($signature);
-
         return $base64Str;
-
     }
 
     /**
+     * Getekende data verifiëren met de public key
+     *
      * @param string $content
      * @param string $signature
      * @param string $publickey
      * @return bool
      */
-    public function verifySignature($content, $signature, $publickey) {
-
+    public function verifySignature(string $content, string $signature, string $publickey) {
         $publicKeyId = openssl_pkey_get_public($publickey);
-
         $result = openssl_verify($content, base64_decode($signature), $publicKeyId, 'RSA-SHA256');
-
         return $result == 1;
     }
 
     /**
+     * Een 4096-bits RSA keypair genereren
+     *
      * @return array
      */
     public function generateKeyPair() {
