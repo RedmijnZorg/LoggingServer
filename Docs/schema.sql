@@ -86,7 +86,8 @@ CREATE TABLE `users` (
   `lasttoken` text DEFAULT NULL,
   `changepassword` int(1) DEFAULT NULL,
   `resettoken` text DEFAULT NULL,
-  `2fa` text DEFAULT NULL
+  `2fa` text DEFAULT NULL,
+  `salted` int(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --

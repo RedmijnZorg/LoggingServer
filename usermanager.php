@@ -8,6 +8,7 @@ if (!isset($routerActive)) {
 
 // Classes laden
 $userOperations = new UserOperations($database);
+$userOperations->setSalt($config['crypto']['salt']);
 $cryptoService = new CryptoService();
 
 $usersArray = $userOperations->getAllUsers();

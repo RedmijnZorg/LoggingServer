@@ -19,7 +19,7 @@ $config['email']['from'] = "EMAIL_FROM";
  * Versleuteling
  */
 $config['crypto']['privatekey'] = __dir__."/privatekey.pem";
-
+$config['crypto']['salt'] = "CRYPTO_SALT";
 /**
  * Genereer een RSA key (aanbevolen 4096 bits) en bewaar deze in privatekey.pem
  * Dit kan je onlien genereren (https://cryptotools.net/rsagen)

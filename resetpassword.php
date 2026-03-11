@@ -15,6 +15,8 @@ if(!isset($_GET['token'])) {
 // Classes laden
 $loginOperations = new LoginOperations($database);
 $userOperations = new UserOperations($database);
+$loginOperations->setSalt($config['crypto']['salt']);
+$userOperations->setSalt($config['crypto']['salt']);
 
 // Gebruiker zoeken via reset token
 $userDetails = $userOperations->getUserByResetToken($_GET['token']);

@@ -53,6 +53,11 @@
 // Formulier is ingevuld
 if(isset($_POST['setconfig'])) {
 
+	// Wachtwoord salt genereren
+	require_once(__dir__."/../Class/CryptoService.php");
+	$cryptoService = new CryptoService();
+	$pwsalt = $cryptoService->generateUUID();
+
 	// Gegevens database opslaan
     if(!isset($_POST['dbhost']) || empty($_POST['dbhost'])) {
         echo "Geef een database hostname op!";
@@ -101,7 +106,7 @@ if(isset($_POST['setconfig'])) {
         echo "Geef een bron mailadres op voor deze app!";
         exit();
     }
-
+    
     if(!isset($_POST['logretention']) || empty($_POST['logretention'])) {
         $_POST['logretention'] = 0;
     }
@@ -125,6 +130,8 @@ if(isset($_POST['setconfig'])) {
     $template = str_replace("APP_LOGO",$_POST['applogo'],$template);
     $template = str_replace("APP_HOSTNAME",$_POST['apphostname'],$template);
     $template = str_replace("EMAIL_FROM",$_POST['mailfrom'],$template);
+    $template = str_replace("CRYPTO_SALT",$pwsalt,$template);
+    
     file_put_contents(__dir__."/../secure/config.php",$template);
     
     // Doorgaan naar het genereren van de sleutel

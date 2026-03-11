@@ -7,6 +7,7 @@ if(!isset($routerActive)) {
 }
 // Classes laden
 $loginOperations = new LoginOperations($database);
+$loginOperations->setSalt($config['crypto']['salt']);
 ?>
 
 <!-- login formulier -->

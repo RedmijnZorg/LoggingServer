@@ -6,12 +6,22 @@ class UserOperations
 {
     private $database;
     private $cryptoService;
+    private $salt;
 
     /**
      * @param mysqli $database
      */
     public function __construct(mysqli $database) {
         $this->database = $database;
+    }
+    
+     /**
+     * Salt voor wachtwoord instellen
+     *
+     * @param string $salt
+     */
+    public function setSalt(string $salt) {
+        $this->salt = $salt;
     }
 
     /**
@@ -54,8 +64,9 @@ class UserOperations
     public function addUser(string $email, string $password, string $fullname) {
         $email = $this->database->real_escape_string($email);
         
-        // Wachtwoord hashen in sha512
-        $password = hash('sha512', $password);
+        // Wachtwoord hashen in sha512 met salt
+        $password = hash('sha512', $password.$this->salt);
+        
         $findMatchingUser = $this->database->query("SELECT `userid` FROM users WHERE `email` = '" . $email . "'");
         
         // Is er al een gebruiker met deze gegevens? Geef 'false' terug
@@ -172,13 +183,15 @@ class UserOperations
     public function changePassword(int $userid, string $password, bool $requireChange = false) {
         $userid = $this->database->real_escape_string($userid);
         
-        // Wachtwoord opslaan in hash sha512
-        $password = hash('sha512', $password);
+        // Wachtwoord hashen in sha512 met salt
+        $password = hash('sha512', $password.$this->salt);
+        
         if($requireChange) {
-            $updatePassword = $this->database->query("UPDATE `users` SET `password` = '$password',`changepassword` = '1',`resettoken` = '' WHERE `userid` = '" . $userid . "'");
+            $updatePassword = $this->database->query("UPDATE `users` SET `password` = '$password',`changepassword` = '1',`resettoken` = '', `salted` = '1' WHERE `userid` = '" . $userid . "'");
         } else {
-            $updatePassword = $this->database->query("UPDATE `users` SET `password` = '$password',`changepassword` = '0',`resettoken` = '' WHERE `userid` = '" . $userid . "'");
+            $updatePassword = $this->database->query("UPDATE `users` SET `password` = '$password',`changepassword` = '0',`resettoken` = '', `salted` = '1' WHERE `userid` = '" . $userid . "'");
         }
+        
         if($updatePassword) {
             return true;
         } else {
