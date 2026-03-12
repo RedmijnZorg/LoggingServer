@@ -81,7 +81,7 @@ class LoginOperations {
             		$this->database->query("UPDATE `users` SET `password` = '$passwordSalt', `salted` = '1' WHERE `userid` = '$userid'");
             }
             // Stel de laatste login in op nu
-            $this->database->query("UPDATE `users` SET `lastlogin` = '$timestamp' WHERE `userid` = '$userid'");
+            $this->database->query("UPDATE `users` SET `lastlogin` = '$timestamp', `failedlogins` = '0' WHERE `userid` = '$userid'");
             
             // Nogmaals controleren op een vergrendeling. Zo ja, geef 'false' terug
             if($returnArray['locked'] == 1) {

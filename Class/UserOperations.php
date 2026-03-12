@@ -189,6 +189,7 @@ class UserOperations
         $userid = $this->database->real_escape_string($userid);
         $unlockuser = $this->database->query("UPDATE `users` SET `locked` = '0' WHERE `userid` = '" . $userid . "'");
         if($unlockuser) {
+        	$this->resetFailedLogins($userid);
             return true;
         } else {
             return false;
