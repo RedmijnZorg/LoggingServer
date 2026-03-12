@@ -16,25 +16,44 @@ class LoggingService
     public function __construct(mysqli $database) {
         $this->database = $database;
     }
-    
-     /**
-     * CryptoService laden
-     *
-     * @param mysqli $database
+    /**
+     * @param CryptoService $cryptoService
      */
-    public function loadCryptoService(CryptoService $cryptoService) {
+    public function loadCryptoService($cryptoService) {
         $this->cryptoService = $cryptoService;
     }
-
+    
+    /**
+    * Informatie van bezoeker ophalen
+    *
+    * @return void
+    */
+    protected function getRemoteInformation() {
+    	// IP adres opzoeken
+    	if(isset($_SERVER["HTTP_CF_CONNECTING_IP"])) { 
+              $_SERVER['REMOTE_ADDR'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+              $_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+		}
+		$client  = @$_SERVER['HTTP_CLIENT_IP'];
+		$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+		$remote  = $_SERVER['REMOTE_ADDR'];
+	
+		if(filter_var($client, FILTER_VALIDATE_IP)) {
+				$this->ipAddress = $client;
+			} elseif(filter_var($forward, FILTER_VALIDATE_IP)) {
+				$this->ipAddress = $forward;
+			} else {
+			$this->ipAddress = $remote;
+		}
+		
+		// User agent en Referer opzoeken
+    	$this->userAgent = $_SERVER['HTTP_USER_AGENT'];
+    	$this->referrer = $_SERVER['HTTP_REFERER'];
+    }
     
      /**
-    * Gebeurtenis toevoegen aan logboek
-     *     
-     * @param int $sourceid
-     * @param string $timestamp
-     * @param string $ip
-     * @param string $useragent
-     * @param string $referrer
+     * Gebeurtenis toevoegen aan logboek
+     *
      * @param string $username
      * @param string $page
      * @param string $event
@@ -42,23 +61,26 @@ class LoggingService
      * @param int $pass
      * @return bool
      */
-    public function logEvent(int $sourceid, string $timestamp, string $ip, string $useragent, string $referrer, string $username, string $page, string $event, string $data, int $pass) {
+    public function logEvent($username, $page, $event, $data, $pass) {
+    		// Controleer of de 'pass' waarde op 0 of 1 staat
     		$pass = intval($pass);
     		if($pass != 0 AND $pass != 1) {
     				return false;
     		}
     		
-    		// Data versleutelen    		
-    		$ipAddress = $this->cryptoService->encryptData(ip2long($ip));
-    		$userAgent = $this->cryptoService->encryptData($useragent);
-    		$referrer = $this->cryptoService->encryptData($referrer);
+    		// Gegevens van bezoeker ophalen
+    		$this->getRemoteInformation();
+    		
+    		$timestamp = time();
+    		$ipAddress = $this->cryptoService->encryptData(intval(ip2long($this->ipAddress)));
+    		$userAgent = $this->cryptoService->encryptData($this->userAgent);
+    		$referrer = $this->cryptoService->encryptData($this->referrer);
     		$username = $this->cryptoService->encryptData($username);
     		$page = $this->cryptoService->encryptData($page);
     		$event = $this->cryptoService->encryptData($event);
     		$data = $this->cryptoService->encryptData($data);
     		
     		// Informatie voorbereiden voor de database
-    		$sourceid = $this->database->real_escape_string($sourceid);
     		$pass = $this->database->real_escape_string($pass);
     		$ipAddress = $this->database->real_escape_string($ipAddress);
     		$userAgent = $this->database->real_escape_string($userAgent);
@@ -67,11 +89,10 @@ class LoggingService
     		$page = $this->database->real_escape_string($page);
     		$event = $this->database->real_escape_string($event);
     		$data = $this->database->real_escape_string($data);
-    		$timestamp = $this->database->real_escape_string(strtotime($timestamp));
-    
+    		$timestamp = $this->database->real_escape_string($timestamp);
+    		
     		// Item toevoegen
     		$additem = $this->database->query("INSERT INTO `logging` (
-    		`sourceid`,
     		`timestamp`,
     		`ip`,
     		`useragent`,
@@ -80,8 +101,8 @@ class LoggingService
     		`page`,
     		`event`,
     		`data`,
-    		`pass`) VALUES (
-    		'".$sourceid."',
+    		`pass`,
+    		`sync`) VALUES (
     		'".$timestamp."',
     		'".$ipAddress."',
     		'".$userAgent."',
@@ -90,18 +111,60 @@ class LoggingService
     		'".$page."',
     		'".$event."',
     		'".$data."',
-    		'".$pass."')");
+    		'".$pass."',
+    		'0')");
     		return $additem;
+    }
+    
+     /**
+     * Ongesyncte logs ophalen
+     *
+     * @return array
+     */
+    public function getUnsyncedLogs() {
+    		$getitems = $this->database->query("SELECT * FROM `logging` WHERE `sync` = '0' ORDER BY `timestamp` ASC");
     		
+    		// Niets gevonden? Geef een lege array terug
+    		if($getitems->num_rows == NULL) {
+    				return array();
+    		}
+    		$returnArray = array();
+    		
+    		// Gevonden? Voeg toe aan de array
+    		while($itemDetails = $getitems->fetch_assoc()) {
+    				unset($itemDetails['sync']); // sync waarde alleen nodig voor log server
+    				$itemDetails['timestamp'] = date(DATE_ATOM,$itemDetails['timestamp']);
+    				$itemDetails['ip'] = long2ip(intval($this->cryptoService->decryptData($itemDetails['ip'])));
+    				$itemDetails['useragent'] = $this->cryptoService->decryptData($itemDetails['useragent']);
+    				$itemDetails['referrer'] = $this->cryptoService->decryptData($itemDetails['referrer']);
+    				$itemDetails['username'] = $this->cryptoService->decryptData($itemDetails['username']);
+    				$itemDetails['page'] = $this->cryptoService->decryptData($itemDetails['page']);
+    				$itemDetails['event'] = $this->cryptoService->decryptData($itemDetails['event']);
+    				$itemDetails['data'] = $this->cryptoService->decryptData($itemDetails['data']);
+    				
+    				$returnArray[] = $itemDetails;
+    		}
+    		
+    		return $returnArray;
+    }
+    
+     /**
+     * Log markeren als gesynct
+     *
+     * @param int $logid
+     * @return bool
+     */
+    public function markLogSynced(int $logid) {
+        	$logid = $this->database->real_escape_string(intval($logid));
+    		return $this->database->query("UPDATE `logging` SET `sync` = '1' WHERE `logid` = '$logid'");	
     }
     
     /**
      * Logs ophalen die aan een bepaald filter voldoen
-     *     
+     *
      * @param int $yearFilter
      * @param int $monthFilter
      * @param int $dayFilter
-     * @param int $sourceFilter
      * @param string $eventFilter
      * @param string $textFilter
      * @param int $allowedFilter
@@ -109,18 +172,23 @@ class LoggingService
      * @param string $sortDirection
      * @return array
      */
-    public function getLogs(int $yearFilter = 0, int $monthFilter = 0, int $dayFilter = 0, int $sourceFilter = 0, string $eventFilter = "", string $textFilter = "", int $allowedFilter = 2, string $sortField = "timestamp", string $sortDirection = "ASC") {
+    public function getLogs(int $yearFilter = 0, int $monthFilter = 0, int $dayFilter = 0, string $eventFilter = "", string $textFilter = "", int $allowedFilter = 2, $sortField = "timestamp", $sortDirection = "ASC") {
+    		// Oplopend sorteren tenzij specifiek 'DESC' is opgegeven
     		if($sortDirection == "DESC") {
     				$sortDirection = "DESC";
     			} else {
     				$sortDirection = "ASC";
     		}
     		
-    		// Sorteren op 'timestamp' tenzij 'ip' of 'pass' is opgegeven
+    		// Sorteren op 'timestamp' tenzij 'ip','pass' of 'sync' is opgegeven
     		if($sortField == "ip") {
     				$sortField = "ip";		
     			} elseif($sortField == "pass") {
     				$sortField = "pass"; 
+    		
+    			} elseif($sortField == "sync") {
+    				$sortField = "sync"; 
+    		
     			} else {
     				$sortField = "timestamp"; 
     		}
@@ -174,6 +242,7 @@ class LoggingService
     				
     				// IP adres converteren vanuit long
     				$itemDetails['ip'] = long2ip(intval($this->cryptoService->decryptData($itemDetails['ip'])));
+    				
     				$itemDetails['useragent'] = $this->cryptoService->decryptData($itemDetails['useragent']);
     				$itemDetails['referrer'] = $this->cryptoService->decryptData($itemDetails['referrer']);
     				$itemDetails['username'] = $this->cryptoService->decryptData($itemDetails['username']);
@@ -182,9 +251,6 @@ class LoggingService
     				$itemDetails['data'] = $this->cryptoService->decryptData($itemDetails['data']);
     				
     				// Filteren op gebeurtenis indien ingesteld
-    				if($sourceFilter != 0 AND $itemDetails['sourceid'] != $sourceFilter) {
-    						continue;
-    				}
     				if($eventFilter != "" AND $itemDetails['event'] != $eventFilter) {
     						continue;
     				}
