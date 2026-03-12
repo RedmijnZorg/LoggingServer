@@ -112,7 +112,11 @@ class RenderService {
         // Variabelen in sjabloon vervangen
         $template = str_replace('VAR_TITLE', $this->title, $template);
         $template = str_replace('VAR_CONTENTSTOP', $this->contenttop, $template);
-        $template = str_replace('VAR_CONTENTSBOTTOM', $this->contentbottom, $template);
+        if(isset($this->contentbottom)) {
+            $template = str_replace('VAR_CONTENTSBOTTOM', $this->contentbottom, $template);
+        } else {
+            $template = str_replace('VAR_CONTENTSBOTTOM', "", $template);
+        }
         if($includebutton == true) {
             $template = str_replace('VAR_BUTTONTEXT', $this->buttonvalue, $template);
             $template = str_replace('VAR_BUTTONURL', $this->buttonurl, $template);
