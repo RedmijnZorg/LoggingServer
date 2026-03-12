@@ -13,6 +13,7 @@ require_once("secure/includes.php");
 $loggingService = new LoggingService($database);
 $loggingService->loadCryptoService($cryptoService);
 $sourceManager = new SourceManager($database);
+$sourceManager->loadCryptoService($cryptoService);
 $sourcesArray = $sourceManager->getAllsources();
 $sourcesArrayPreloaded = array();
 foreach($sourcesArray as $source) {

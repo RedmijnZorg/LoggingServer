@@ -23,6 +23,15 @@ class UserOperations
     public function setSalt(string $salt) {
         $this->salt = $salt;
     }
+    
+     /**
+     * @param CryptoService $cryptoService
+     * @return void
+     */
+    public function loadCryptoService(CryptoService $cryptoService) {
+        $this->cryptoService = $cryptoService;
+    }
+
 
     /**
      * Details gebruiker ophalen
@@ -40,15 +49,28 @@ class UserOperations
         $returnArray = array();
         $useridFound = $userDetails['userid'];
         $returnArray['userid'] = $useridFound;
-        $returnArray['fullname'] = $userDetails['fullname'];
-        $returnArray['email'] = $userDetails['email'];
+        if($userDetails['fullname'] == "") {
+        	$returnArray['fullname'] = "";
+        	} else {
+            $returnArray['fullname'] = $this->cryptoService->decryptData($userDetails['fullname']);
+        }
+        
+        if($userDetails['email'] == "") {
+        	$returnArray['email'] = "";
+        	} else {
+            $returnArray['email'] = $this->cryptoService->decryptData($userDetails['email']);
+        }
         $returnArray['failedlogins'] = $userDetails['failedlogins'];
         $returnArray['archived'] = $userDetails['archived'];
         $returnArray['locked'] = $userDetails['locked'];
         $returnArray['lasttoken'] = $userDetails['lasttoken'];
         $returnArray['lastlogin'] = $userDetails['lastlogin'];
         $returnArray['changepassword'] = $userDetails['changepassword'];
-        $returnArray['2fa'] = $userDetails['2fa'];
+        if($userDetails['2fa'] == "") {
+        	$returnArray['2fa'] = "";
+        	} else {
+            $returnArray['2fa'] = $this->cryptoService->decryptData($userDetails['2fa']);
+        }
         return $returnArray;
     }
 
@@ -62,7 +84,8 @@ class UserOperations
      * @return int|bool
      */
     public function addUser(string $email, string $password, string $fullname) {
-        $email = $this->database->real_escape_string($email);
+        $email = $this->database->real_escape_string($this->cryptoService->encryptData($email));
+        $fullname = $this->database->real_escape_string($this->cryptoService->encryptData($fullname));
         
         // Wachtwoord hashen in sha512 met salt
         $password = hash('sha512', $password.$this->salt);
@@ -101,12 +124,12 @@ class UserOperations
 
 		// Is de naam niet leeg? Neem die dan mee in de query
         if($fullname != "") {
-            $querystringappend .= "`fullname` = '" . $fullname . "'";
+            $querystringappend .= "`fullname` = '" . $this->database->real_escape_string($this->cryptoService->encryptData($fullname)) . "'";
         }
         
 		// Is de e-mail niet leeg? Neem die dan mee in de query
         if($email != "") {
-            $querystringappend .= ", `email` = '" .$this->database->real_escape_string($email) . "' ";
+            $querystringappend .= ", `email` = '" .$this->database->real_escape_string($this->cryptoService->encryptData($email)) . "' ";
         }
         
         // Query aan elkaar plakken
@@ -183,7 +206,7 @@ class UserOperations
     public function changePassword(int $userid, string $password, bool $requireChange = false) {
         $userid = $this->database->real_escape_string($userid);
         
-        // Wachtwoord hashen in sha512 met salt
+         // Wachtwoord hashen in sha512 met salt
         $password = hash('sha512', $password.$this->salt);
         
         if($requireChange) {
@@ -191,7 +214,6 @@ class UserOperations
         } else {
             $updatePassword = $this->database->query("UPDATE `users` SET `password` = '$password',`changepassword` = '0',`resettoken` = '', `salted` = '1' WHERE `userid` = '" . $userid . "'");
         }
-        
         if($updatePassword) {
             return true;
         } else {
@@ -267,12 +289,22 @@ class UserOperations
      * @return array
      */
     public function getAllUsers() {
-        $users = $this->database->query("SELECT `userid` FROM `users` ORDER BY `fullname` ASC");
+        $users = $this->database->query("SELECT `userid` FROM `users`");
         $returnArray = array();
         if($users->num_rows > 0) {
             while($user = $users->fetch_assoc()) {
                 $returnArray[] = $this->getUserDetails($user['userid']);
             }
+        }
+        // Sorteren
+        if(count($returnArray) > 0) {
+            foreach ($returnArray as $key => $row) {
+                $volume[$key]  = $row['fullname'];
+            }
+
+            $volume  = array_column($returnArray, 'fullname');
+
+            array_multisort($volume, SORT_ASC, SORT_NATURAL|SORT_FLAG_CASE, $returnArray);
         }
         return $returnArray;
     }
@@ -288,7 +320,7 @@ class UserOperations
       if($resettoken == "") {
           return false;
       }
-      $resettoken = $this->database->real_escape_string($resettoken);
+      $resettoken = $this->database->real_escape_string($this->cryptoService->encryptData($resettoken));
       $finduser = $this->database->query("SELECT `userid` FROM `users` WHERE `resettoken` = '" . $resettoken . "'");
       if($finduser->num_rows > 0) {
           $userdetails = $finduser->fetch_assoc();
@@ -307,7 +339,9 @@ class UserOperations
      */
     public function setUser2FASecret(int $userid, string $secret = "") {
         $userid = $this->database->real_escape_string($userid);
-        $secret = $this->database->real_escape_string($secret);
+        if($secret != "") {
+        		$secret = $this->database->real_escape_string($this->cryptoService->encryptData($secret));
+        }
 
         $setSecret = $this->database->query("UPDATE `users` SET `2fa` = '$secret' WHERE `userid` = '" . $userid . "'");
         return $setSecret;
@@ -322,8 +356,7 @@ class UserOperations
      */
     public function assignResetToken(int $userid) {
         $userid = $this->database->real_escape_string($userid);
-        $cryotoservice = new CryptoService();
-        $resettoken = $cryotoservice->generateUUID();
+        $resettoken = $this->cryptoService->encryptData($this->cryptoService->generateUUID());
         $assign = $this->database->query("UPDATE `users` SET `resettoken` = '$resettoken' WHERE `userid` = '" . $userid . "'");
         if($assign) {
             return $resettoken;
@@ -332,21 +365,4 @@ class UserOperations
         }
     }
 
-    /**
-     * Gebruiker zoeken via e-mail
-     *
-     * @param string $email
-     * @return false|int
-     */
-    public function findUserByEmail(string $email) {
-        $email = $this->database->real_escape_string($email);
-        $getuser = $this->database->query("SELECT `userid` FROM `users` WHERE `email` = '" . $email . "'");
-        if($getuser->num_rows > 0) {
-            $userdetails = $getuser->fetch_assoc();
-            $userid = $userdetails['userid'];
-            return $userid;
-        } else {
-            return false;
-        }
-    }
 }

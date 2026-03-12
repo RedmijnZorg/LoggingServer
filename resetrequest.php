@@ -8,6 +8,7 @@ if(!isset($routerActive)) {
 
 // Classes laden
 $userOperations = new UserOperations($database);
+$userOperations->loadCryptoService($cryptoService);
 ?>
 <!-- herstelformulier -->
 <form method="post">

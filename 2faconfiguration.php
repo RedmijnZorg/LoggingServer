@@ -8,7 +8,9 @@ if(!isset($routerActive)) {
 
 // Classes laden
 $loginOperations = new LoginOperations($database);
+$loginOperations->loadCryptoService($cryptoService);
 $userOperations = new UserOperations($database);
+$userOperations->loadCryptoService($cryptoService);
 $googleAuthenticator = new GoogleAuthenticator();
 
 /** 

@@ -27,23 +27,23 @@ if(isset($_POST['submit'])){
     $cryptoService = new CryptoService();
 
 	// Mailadres gereed maken voor database
-    $email = $database->real_escape_string($_POST['email']);
+    $email = $database->real_escape_string($cryptoService->encryptData($_POST['email']));
     
     // Tijdelijk wachtwoord genereren
     $password = $cryptoService->generatePassword();
     
     // Wachtwoord hashen
-    $passwordhashed = hash("sha512", $password);
+    $passwordhashed = hash("sha512", $password.$config['crypto']['salt']);
 
 	// Gebruiker toevoegen, ontgrendelen en wachtwoord wijziging verplichten
-    $adduser = $database->query("INSERT INTO `users` (`email`, `fullname`,`password`,`locked`,`changepassword`) VALUES ('$email', '$username','$passwordhashed','0','0')");
+    $adduser = $database->query("INSERT INTO `users` (`email`, `fullname`,`password`,`locked`,`changepassword`,`salted`) VALUES ('$email', 'Beheerder','$passwordhashed','0','0','1')");
     
     echo "<br>Inloggegevens:<br>";
     echo "<table>";
 
     echo "<tr>";
     echo "<th>E-mail</th>";
-    echo "<td>".$email."</td>";
+    echo "<td>".$_POST['email']."</td>";
     echo "</tr>";
     echo "<tr>";
     echo "<th>Wachtwoord</th>";

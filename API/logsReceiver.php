@@ -10,6 +10,7 @@ require_once(__dir__."/../secure/includes.php");
 $sourceManager = new SourceManager($database);
 $loggingService = new LoggingService($database);
 $loggingService->loadCryptoService($cryptoService);
+$sourceManager->loadCryptoService($cryptoService);
 $sourceDetails = $sourceManager->getSourceFromHeaders();
 if($sourceDetails == false) {
 	// Is de bron niet gevonden? Dan is de source token ongeldig.

@@ -18,6 +18,7 @@ if(isset($_GET['userid']) AND $_GET['userid'] != ""){
     
     // Zoek gebruiker op
     $userOperations = new UserOperations($database);
+	$userOperations->loadCryptoService($cryptoService);
     $userdetails = $userOperations->getUserDetails($userid);
     
     if($userdetails == false){

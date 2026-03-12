@@ -8,6 +8,7 @@ if (!isset($routerActive)) {
 
 // Classes laden
 $sourceManager = new SourceManager($database);
+$sourceManager->loadCryptoService($cryptoService);
 
 // Alle bronnen laden
 $sourcesArray = $sourceManager->getAllsources();

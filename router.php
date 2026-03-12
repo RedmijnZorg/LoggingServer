@@ -95,7 +95,6 @@ if($apiRoute == true) {
     
     // Open het bijpassende bestand nu
     require_once($includefile);
-    
     // Geen opmaak nodig, dus we kunnen stoppen
     exit();
 }

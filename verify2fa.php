@@ -9,6 +9,7 @@ if(!isset($routerActive)) {
 // Classes laden
 $googleAuthenticator = new GoogleAuthenticator();
 $userOperations = new UserOperations($database);
+$userOperations->loadCryptoService($cryptoService);
 $userDetails = $userOperations->getUserDetails($_SESSION['user']['userid']);
 ?>
 <!-- 2FA controleformulier -->

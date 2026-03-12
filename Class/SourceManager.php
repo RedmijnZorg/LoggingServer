@@ -6,6 +6,7 @@ class SourceManager
 {
 
     private $database;
+    private $cryptoService;
 
     /**
      * @param mysqli $database
@@ -14,6 +15,14 @@ class SourceManager
         $this->database = $database;
     }
 
+	 /**
+	 * @param CryptoService $cryptoService
+	 * @return void
+	 */ 
+	public function loadCryptoService(CryptoService $cryptoService) {
+		$this->cryptoService = $cryptoService;
+	}
+	
     /**
      * Voegt een nieuwe bron toe
      *
@@ -21,9 +30,8 @@ class SourceManager
      * @return false|int
      */
     public function addSource(string $name) {
-        $name = $this->database->real_escape_string($name);
-        $cryptoService = new CryptoService();
-        $token = $cryptoService->generateUUID();
+        $name = $this->database->real_escape_string($this->cryptoService->encryptData($name));
+        $token = $this->cryptoService->encryptData($this->cryptoService->generateUUID());
 
 		// Bron toevoegen
         $addsource = $this->database->query("INSERT INTO sources (name, token,lastsignal) VALUES ('$name', '$token','0')");
@@ -50,13 +58,18 @@ class SourceManager
         if($getsource->num_rows != 0) {
         	// Is de bron gevonden? Geef de details terug
             $sourcedetails = $getsource->fetch_assoc();
+            
+            // Data ontsleutelen
+            $sourcedetails['name'] = $this->cryptoService->decryptData($sourcedetails['name']);
+            $sourcedetails['token'] = $this->cryptoService->decryptData($sourcedetails['token']);
+            
             return $sourcedetails;
         } else {
         	// Is de bron niet gevonden? Geef 'false' terug
             return false;
         }
     }
-
+    
     /**
      * Zoekt een bron op basis van een token
      *     
@@ -65,13 +78,19 @@ class SourceManager
      */
     public function getSourceByToken(string $token) {
         $token = $this->database->real_escape_string($token);
-        
-        // Zoek de bron die bij dit token past
-        $getsource = $this->database->query("SELECT `sourceid` FROM sources WHERE token = '$token'");
-        if($getsource->num_rows != 0) {
-        	// Is de bron gevonden? Geef de details terug
-            $sourceDetails = $getsource->fetch_assoc();
-            return $this->getSourceDetails($sourceDetails['sourceid']);
+
+        // Zoek de app die bij dit token past
+        $getsources = $this->database->query("SELECT `sourceid` FROM sources");
+        if($getsources->num_rows != 0) {
+            while($sourceDetails = $getsources->fetch_assoc()) {
+            	$detailsFound = $this->getSourceDetails($sourceDetails['sourceid']);
+            	 // Is de bron gevonden? Geef de details terug
+            	if($detailsFound['token'] == $token) {
+            		return $detailsFound;
+            	}
+            }
+            // Is de bron niet gevonden? Geef 'false' terug
+            return false;
         } else {
         	// Is de bron niet gevonden? Geef 'false' terug
             return false;
@@ -85,7 +104,7 @@ class SourceManager
      */
     public function getAllsources() {
     	// Alle bronnen ophalen
-        $getsources = $this->database->query("SELECT `sourceid` FROM sources ORDER BY name ASC");
+        $getsources = $this->database->query("SELECT `sourceid` FROM sources");
         $returnArray = array();
 
         if($getsources->num_rows != 0) {
@@ -94,6 +113,18 @@ class SourceManager
                 $returnArray[] = $this->getSourceDetails($sourceDetails['sourceid']);
             }
         }
+        
+        // Sorteren
+        if(count($returnArray) > 0) {
+            foreach ($returnArray as $key => $row) {
+                $volume[$key]  = $row['name'];
+            }
+
+            $volume  = array_column($returnArray, 'name');
+
+            array_multisort($volume, SORT_ASC, SORT_NATURAL|SORT_FLAG_CASE, $returnArray);
+        }
+        
         return $returnArray;
     }
 

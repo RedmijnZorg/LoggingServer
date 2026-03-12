@@ -18,6 +18,7 @@ if(!isset($_SESSION['user'])) {
 // Gegvens van gebruiker ophalen
 $userIDlogin = $_SESSION['user']['userid'];
 $userOperations = new UserOperations($database);
+$userOperations->loadCryptoService($cryptoService);
 $userDetails = $userOperations->getUserDetails($userIDlogin);
 
 // Is de gebruiker niet bekend of verwijderd? Stop en stuur naar loginpagina

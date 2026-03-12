@@ -10,6 +10,7 @@ session_start();
 // Gegevens van gebruiker ophalen
 $userIDlogin = $_SESSION['user']['userid'];
 $userOperations = new UserOperations($database);
+$userOperations->loadCryptoService($cryptoService);
 $userDetails = $userOperations->getUserDetails($userIDlogin);
 
 // Is deze gebruiker niet ingelogd of verwijderd? Stop met 403 error

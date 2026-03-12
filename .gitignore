@@ -1,0 +1,6 @@
+/Attachments/*.attachment
+.DS_Store
+/*/.DS_Store
+/.idea
+/secure/config.php
+/secure/*.pem
