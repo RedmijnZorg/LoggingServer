@@ -22,7 +22,10 @@ class CryptoService
      * @param string $input
      * @return string
      */
-    public function encryptData(string $input = "") {
+    public function encryptData($input = "") {
+    	if($input == null) {
+    			return "";
+    	}
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
         $encrypted = openssl_encrypt($input, 'aes-256-cbc', $this->privateKey, 0, $iv);
         return base64_encode($encrypted . '::' . $iv);
@@ -34,7 +37,10 @@ class CryptoService
      * @param string $input
      * @return false|string
      */
-    public function decryptData(string $input = "") {
+    public function decryptData($input = "") {
+    	if($input == null) {
+    			return "";
+    	}
         list($encrypted_data, $iv) = explode('::', base64_decode($input), 2);
         return openssl_decrypt($encrypted_data, 'aes-256-cbc', $this->privateKey, 0, $iv);
     }
