@@ -34,7 +34,7 @@ $qrcode = $googleAuthenticator->getQRCodeGoogleUrl($config['app']['name'],$newse
 <form method="post" id="twofaform">
     <input type="hidden" name='secret' value="<?php echo $newsecret; ?>">
     <input type="hidden" name='submitform' value="1">
-    <div class="message-container" style='z-index: -1;'>
+    <div class="message-container" id='twofaconfig'>
         <p class="message-title">Authenticator instellen</p>
         <div class="input-container" style="padding-bottom: 15px; text-align: center;">Scan de volgende QR code of voer de configuratiecode in in uw Authenticator app. Voer vervolgens de 6-cijferige code uit de Authenticator app in ter controle</div>
         <div class="input-container" style="padding-bottom: 15px; text-align: center;"><img src="<?php echo $qrcode ?>"/></div>

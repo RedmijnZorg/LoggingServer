@@ -23,3 +23,17 @@ button#setupLink {
 span#twofaerror {
 	margin-top: -30px;
 }
+div#twofaconfig {
+	height: 570px; 
+	width: 500px;
+}
+
+@media screen and (max-width: 991px) {   
+ div#bodycontainer {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    div#twofaconfig {
+    	width: 100% !important;
+    }
+}
