@@ -48,8 +48,8 @@ class LoginOperations {
         // Voor overgang ook een wachtwoord met salt maken
         $passwordSalt = hash('sha512', $passwordinput.$this->salt);
         
-        // Gebruikers mmet dit wachtwoord opzoeken, daarbij een vergrendeld account negeren
-        $finduser = $this->database->query("SELECT `userid`,`email`,`salted` FROM `users` WHERE (`password` = '$password' OR `password` = '$passwordSalt') AND `locked` = '0'");
+        // Gebruikers met dit wachtwoord opzoeken, daarbij een vergrendeld account negeren
+        $finduser = $this->database->query("SELECT `userid`,`salted` FROM `users` WHERE (`password` = '$password' OR `password` = '$passwordSalt') AND `locked` = '0'");
         
         // Er vanuit gaan dat er niets is gevonden
         $userfound = false;

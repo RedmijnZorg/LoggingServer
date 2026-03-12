@@ -366,4 +366,29 @@ class UserOperations
         }
     }
 
+    /**
+     * Gebruiker zoeken via e-mail
+     *
+     * @param string $email
+     * @return bool
+     */
+    function findUserByEmail(string $email) {
+     	// Alle gebruikers opzoeken
+        $finduser = $this->database->query("SELECT `userid` FROM `users`");
+        
+        // Is er een resultaat gevonden? 
+        if ($finduser->num_rows != 0) {
+        	// Zo ja, haal de gegevens op
+            while($userDetails = $finduser->fetch_assoc()) {
+            		// Zoek tussen de resultaten of ergens een matchend mailadres is gevonden
+            		$userData = $this->getUserDetails($userDetails['userid']);
+            		if(strtolower(trim($userData['email'])) == strtolower(trim($email))) {
+            				// zo ja, geef 'true' terug
+            				return true;
+            		}
+            }
+        }
+		// geen matches, dus geef 'true' terug
+		return false;
+    }
 }
